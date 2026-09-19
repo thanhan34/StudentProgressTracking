@@ -1,7 +1,9 @@
 "use client";
 
-import { Plus, Save, X } from "lucide-react";
-import { useState, type FormEvent, type KeyboardEvent } from "react";
+import { Save, X } from "lucide-react";
+import { useState, type FormEvent } from "react";
+import StaffSelect from "@/components/staff-select";
+import type { AssignedUser } from "@/lib/staff";
 import type { PteSkill, Student, StudentStatus, StudyPhase, TaskProgress } from "@/data/students";
 import { generateStudentId } from "@/lib/student-id";
 import { createDefaultTasks } from "@/lib/pte-tasks";
@@ -15,12 +17,14 @@ type StudentFormProps = {
 };
 
 type FormState = {
+  instructorUsers: AssignedUser[]; teachingAssistantUsers: AssignedUser[];
   id: string; name: string; instructors: string[]; teachingAssistants: string[]; startDate: string;
   examDate: string; phase: StudyPhase; status: StudentStatus; targetScore: number;
   currentScore: number; attendance: number; skills: Record<PteSkill, number>;
 };
 
 const defaultForm: FormState = {
+  instructorUsers: [], teachingAssistantUsers: [],
   id: "", name: "", instructors: [], teachingAssistants: [], startDate: "", examDate: "",
   phase: "Nền tảng", status: "Đúng tiến độ", targetScore: 65, currentScore: 30,
   attendance: 100, skills: { Speaking: 30, Writing: 30, Reading: 30, Listening: 30 },
@@ -28,6 +32,7 @@ const defaultForm: FormState = {
 
 export default function StudentForm({ student, existingIds, onCancel, onSave }: StudentFormProps) {
   const [form, setForm] = useState<FormState>(() => student ? {
+    instructorUsers: student.instructorUsers ?? [], teachingAssistantUsers: student.teachingAssistantUsers ?? [],
     id: student.id, name: student.name,
     instructors: [...student.instructors], teachingAssistants: [...student.teachingAssistants],
     startDate: student.startDate, examDate: student.examDate ?? "", phase: student.phase,
@@ -68,8 +73,8 @@ export default function StudentForm({ student, existingIds, onCancel, onSave }: 
       <FormField label="Họ và tên *"><input required value={form.name} onChange={(event) => update("name", event.target.value)} placeholder="Nguyễn Văn An" /></FormField>
     </div></div>
     <div className="form-section"><h3>Đội ngũ hỗ trợ</h3><div className="form-grid support-form-grid">
-      <NameListInput label="Giảng viên phụ trách" names={form.instructors} placeholder="Nhập tên giảng viên" onChange={(names) => update("instructors", names)} />
-      <NameListInput label="Trợ giảng hỗ trợ" names={form.teachingAssistants} placeholder="Nhập tên trợ giảng" onChange={(names) => update("teachingAssistants", names)} />
+      <StaffSelect label="Giảng viên phụ trách" names={form.instructors} selectedUsers={form.instructorUsers} onChange={(instructors, instructorUsers) => setForm((current) => ({ ...current, instructors, instructorUsers }))} />
+      <StaffSelect label="Trợ giảng hỗ trợ" names={form.teachingAssistants} selectedUsers={form.teachingAssistantUsers} onChange={(teachingAssistants, teachingAssistantUsers) => setForm((current) => ({ ...current, teachingAssistants, teachingAssistantUsers }))} />
     </div></div>
     <div className="form-section"><h3>Lộ trình học và kỳ thi</h3><div className="form-grid form-grid-3">
       <FormField label="Ngày bắt đầu *"><input required type="date" value={form.startDate} onChange={(event) => update("startDate", event.target.value)} /></FormField>
@@ -88,17 +93,3 @@ export default function StudentForm({ student, existingIds, onCancel, onSave }: 
 
 function FormField({ label, children }: { label: string; children: React.ReactNode }) { return <label className="form-field"><span>{label}</span>{children}</label>; }
 function ScoreInput({ value, onChange }: { value: number; onChange: (value: number) => void }) { return <input type="number" min="10" max="90" value={value} onChange={(event) => onChange(Number(event.target.value))} />; }
-
-function NameListInput({ label, names, placeholder, onChange }: { label: string; names: string[]; placeholder: string; onChange: (names: string[]) => void }) {
-  const [value, setValue] = useState("");
-  const addName = () => {
-    const name = value.trim().replace(/,$/, "").trim();
-    if (!name) return;
-    if (!names.some((item) => item.toLocaleLowerCase("vi") === name.toLocaleLowerCase("vi"))) onChange([...names, name]);
-    setValue("");
-  };
-  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter" || event.key === ",") { event.preventDefault(); addName(); }
-  };
-  return <div className="name-list-field"><span className="name-list-label">{label}</span><div className="name-entry"><input value={value} onChange={(event) => setValue(event.target.value)} onKeyDown={handleKeyDown} onBlur={() => value.trim() && addName()} placeholder={placeholder} /><button type="button" onMouseDown={(event) => event.preventDefault()} onClick={addName} aria-label={`Thêm ${label.toLocaleLowerCase("vi")}`}><Plus size={15} />Thêm</button></div><div className="name-chips">{names.map((name) => <span key={name.toLocaleLowerCase("vi")}>{name}<button type="button" onClick={() => onChange(names.filter((item) => item !== name))} aria-label={`Xóa ${name}`}><X size={12} /></button></span>)}{!names.length && <small>Chưa phân công</small>}</div></div>;
-}

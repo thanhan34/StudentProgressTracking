@@ -1,7 +1,8 @@
 import Dashboard from "@/components/dashboard";
 import { requireApprovedAccess } from "@/lib/auth";
+import { StaffProvider } from "@/components/staff-provider";
 
 export default async function Home() {
   await requireApprovedAccess();
-  return <Dashboard />;
+  return <StaffProvider><Dashboard /></StaffProvider>;
 }

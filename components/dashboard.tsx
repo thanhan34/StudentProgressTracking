@@ -4,11 +4,13 @@ import { TaskNotesDetails, WeeklyTrackingDetails } from "@/components/tracking-d
 
 import {
   AlertTriangle, BarChart3, Bell, BookOpenCheck, CalendarClock, CalendarDays,
-  ChevronRight, CircleHelp, ClipboardList, Download, GraduationCap, Headphones,
+  ChevronRight, CircleHelp, ClipboardList, Download, Headphones,
   LayoutDashboard, Menu, Mic2, Pencil, PenLine, Search, Settings, UserCheck,
   Target, Trash2, UserPlus, Users, X,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import Image from "next/image";
+import brandLogo from "@/images/logo/white-logo.png";
 import {
   type PteSkill, type Student,
   type StudentStatus,
@@ -116,7 +118,7 @@ export default function Dashboard() {
   return (
     <div className="app-shell">
       <aside className={`sidebar ${menuOpen ? "open" : ""}`}>
-        <div className="brand"><span className="brand-mark"><GraduationCap size={23} /></span><span>PTE Intensive</span></div>
+        <div className="brand"><Image src={brandLogo} alt="PTE Intensive" className="brand-logo" priority sizes="140px" /></div>
         <button className="sidebar-close" onClick={() => setMenuOpen(false)} aria-label="Đóng menu"><X /></button>
         <nav className="main-nav" aria-label="Điều hướng chính">
           <p className="nav-title">QUẢN LÝ PTE</p>

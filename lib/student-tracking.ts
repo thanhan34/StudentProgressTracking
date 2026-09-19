@@ -20,6 +20,7 @@ export function applyWeeklyTask(task: TaskProgress, result: WeeklyTaskResult, pr
     ...task,
     score: sync ? result.score : task.score,
     practiced: Math.max(0, task.practiced + result.practiced - previousPracticed),
+    ...(sync ? { assigneeUsers: result.assigneeUsers ?? (result.assignees ? [] : task.assigneeUsers ?? []) } : {}),
     ...(sync ? { assignees: result.assignees ?? task.assignees ?? [], progressText: result.progressText ?? task.progressText ?? "", limitations: result.limitations ?? task.limitations ?? "" } : {}),
   };
 }

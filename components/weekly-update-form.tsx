@@ -43,6 +43,7 @@ export default function WeeklyUpdateForm({ student, reportIndex, onCancel, onSav
       const saved = existingReport?.taskResults?.find((item) => item.code === task.code);
       return { code: task.code, score: saved?.score ?? task.score, practiced: saved?.practiced ?? 0,
         assignees: saved?.assignees ?? (existingReport ? [] : task.assignees ?? []),
+        assigneeUsers: saved?.assigneeUsers ?? (existingReport ? [] : task.assigneeUsers ?? []),
         progressText: saved?.progressText ?? (existingReport ? "" : task.progressText ?? ""),
         limitations: saved?.limitations ?? (existingReport ? "" : task.limitations ?? ""),
       };
