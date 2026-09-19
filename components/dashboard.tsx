@@ -20,6 +20,9 @@ import TaskManager from "@/components/task-manager";
 import WeeklyUpdateForm from "@/components/weekly-update-form";
 import { useStudents } from "@/hooks/use-students";
 import AuthControls from "@/components/auth-controls";
+import { useStaff } from "@/components/staff-provider";
+import { ROLE_LABELS } from "@/lib/roles";
+import { matchesStudentAssignee } from "@/lib/student-assignment";
 import { formatStudentDate as formatDate, daysUntilExam, isUpcomingExam, examCountdown } from "@/lib/student-dates";
 
 const navItems = [
@@ -39,7 +42,9 @@ const statusStyle: Record<StudentStatus, string> = {
 const skillIcons = { Speaking: Mic2, Writing: PenLine, Reading: BookOpenCheck, Listening: Headphones };
 const skillColors = { Speaking: "#fc5d01", Writing: "#fd7f33", Reading: "#e85200", Listening: "#ff8a47" };
 
-export default function Dashboard() {
+export default function Dashboard({ currentUserId }: { currentUserId: string }) {
+  const { users: staff, loading: staffLoading, error: staffError, reload: reloadStaff } = useStaff();
+  const [assigneeFilter, setAssigneeFilter] = useState(currentUserId);
   const { studentList, isLoading, storageError, saveStudent, removeStudent } = useStudents();
   const upcomingExams = studentList.filter((student) => isUpcomingExam(student.examDate));
   const needsAttention = studentList.filter((student) => student.status === "Cần chú ý");
@@ -68,10 +73,11 @@ export default function Dashboard() {
     return studentList.filter((student) => {
       const searchable = `${student.name} ${student.id} ${student.instructors.join(" ")} ${student.teachingAssistants.join(" ")} ${student.tasks.map((task) => task.code).join(" ")}`.toLocaleLowerCase("vi");
       return (!normalizedQuery || searchable.includes(normalizedQuery))
+        && matchesStudentAssignee(student, assigneeFilter)
         && (phaseFilter === "Tất cả giai đoạn" || student.phase === phaseFilter)
         && (statusFilter === "Tất cả trạng thái" || student.status === statusFilter);
     });
-  }, [phaseFilter, query, statusFilter, studentList]);
+  }, [phaseFilter, query, statusFilter, studentList, assigneeFilter]);
   const selectedIndex = filteredStudents.findIndex((student) => student.id === selectedStudent?.id);
   const nextStudent = selectedIndex >= 0 ? filteredStudents[selectedIndex + 1] : undefined;
 
@@ -88,7 +94,7 @@ export default function Dashboard() {
     URL.revokeObjectURL(anchor.href);
   };
 
-  const resetFilters = () => { setQuery(""); setPhaseFilter("Tất cả giai đoạn"); setStatusFilter("Tất cả trạng thái"); };
+  const resetFilters = () => { setQuery(""); setPhaseFilter("Tất cả giai đoạn"); setStatusFilter("Tất cả trạng thái"); setAssigneeFilter(""); };
 
   const handleSave = async (student: Student) => {
     await saveStudent(student);
@@ -177,12 +183,19 @@ export default function Dashboard() {
             <div className="table-tools">
               <div className="table-search"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Học viên, giảng viên, trợ giảng..." />{query && <button onClick={() => setQuery("")} aria-label="Xóa tìm kiếm"><X size={15} /></button>}</div>
               <select value={phaseFilter} onChange={(event) => setPhaseFilter(event.target.value)} aria-label="Lọc theo giai đoạn"><option>Tất cả giai đoạn</option><option>Nền tảng</option><option>Luyện task</option><option>Mock test</option><option>Nước rút</option></select>
+              <select value={assigneeFilter} onChange={(event) => setAssigneeFilter(event.target.value)} aria-label="Lọc theo người phụ trách">
+                <option value="">Tất cả người phụ trách</option>
+                <option value={currentUserId}>Tôi phụ trách</option>
+                {staff.filter((user) => user.id !== currentUserId).map((user) => <option key={user.id} value={user.id}>{user.name} — {ROLE_LABELS[user.role]} ({user.id.slice(-6)})</option>)}
+                {staffLoading && <option disabled>Đang tải người phụ trách...</option>}
+              </select>
               <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} aria-label="Lọc trạng thái"><option>Tất cả trạng thái</option><option>Đúng tiến độ</option><option>Cần chú ý</option><option>Sắp thi</option></select>
             </div>
             <div className="table-wrapper"><table className="pte-table"><thead><tr><th>HỌC VIÊN</th><th>NGÀY BẮT ĐẦU</th><th>KỲ THI DỰ KIẾN</th><th>ĐIỂM PTE</th><th>TASK YẾU</th><th>TUẦN GẦN NHẤT</th><th>TRẠNG THÁI</th><th /></tr></thead>
               <tbody>{filteredStudents.map((student) => { const weakTask = weakestTask(student); const latestWeek = student.weeklyReports.at(-1); return <tr key={student.id} onClick={() => setSelectedStudent(student)}><td><div className="student-cell"><span className="student-avatar" style={{ background: `${student.color}18`, color: student.color }}>{student.initials}</span><div><strong>{student.name}</strong><small>{student.id} · {student.phase}</small><span className="support-summary">GV: {supportNames(student.instructors)} · TG: {supportNames(student.teachingAssistants)}</span></div></div></td><td><strong className="date-value">{formatDate(student.startDate)}</strong><small>Đã học {weeksStudied(student.startDate)} tuần</small></td><td><strong className="date-value">{formatDate(student.examDate)}</strong><small className={isUpcomingExam(student.examDate) ? "exam-soon" : ""}>{examCountdown(student.examDate)}</small></td><td><div className="score-progress"><strong>{student.currentScore}<span>/{student.targetScore}</span></strong><div><i style={{ width: `${student.currentScore / student.targetScore * 100}%` }} /></div></div></td><td>{weakTask ? <span className="weak-task"><b>{weakTask.code}</b><small>{weakTask.score}/{weakTask.target}</small></span> : <small>Chưa có task</small>}</td><td>{latestWeek ? <><strong>{latestWeek.tasksCompleted} task</strong><small>Mock {latestWeek.mockScore} · CC {latestWeek.attendance}%</small></> : <small>Chưa có báo cáo</small>}</td><td><span className={statusStyle[student.status]}><i />{student.status}</span></td><td><div className="row-actions"><button className="tasks" onClick={(event) => { event.stopPropagation(); setManagingTasks(student); }} aria-label={`Quản lý tasks của ${student.name}`} title="Quản lý tasks"><BookOpenCheck size={15} /></button><button className="weekly" onClick={(event) => { event.stopPropagation(); setWeeklyUpdate({ student }); }} aria-label={`Cập nhật tuần cho ${student.name}`} title="Cập nhật tuần"><ClipboardList size={15} /></button><button className="edit" onClick={(event) => { event.stopPropagation(); setEditingStudent(student); }} aria-label={`Sửa ${student.name}`} title="Sửa"><Pencil size={15} /></button><button className="delete" onClick={(event) => { event.stopPropagation(); setDeletingStudent(student); }} aria-label={`Xóa ${student.name}`} title="Xóa"><Trash2 size={15} /></button></div></td></tr>; })}</tbody>
             </table>{isLoading ? <div className="empty-state"><strong>Đang tải học viên...</strong></div> : !filteredStudents.length && <div className="empty-state"><Search size={28} /><strong>{storageError ? "Không thể tải học viên" : studentList.length ? "Không tìm thấy học viên" : "Chưa có học viên"}</strong><p>{storageError ? "Kiểm tra kết nối và quyền Firebase rồi tải lại trang." : studentList.length ? "Hãy thử thay đổi bộ lọc." : "Nhấn Thêm học viên để bắt đầu."}</p></div>}</div>
-            <div className="table-footer"><span>Hiển thị {filteredStudents.length} trên {studentList.length} học viên PTE</span><div><button disabled>Trước</button><button className="page-active">1</button><button disabled>Sau</button></div></div>
+            {staffError && <div className="assignment-filter-note" role="alert">{staffError} <button type="button" className="text-button" onClick={reloadStaff}>Thử lại</button></div>}
+            <div className="table-footer"><span>Hiển thị {filteredStudents.length} trên {studentList.length} học viên PTE{assigneeFilter === currentUserId ? " · Tôi phụ trách" : ""}</span><div><button disabled>Trước</button><button className="page-active">1</button><button disabled>Sau</button></div></div>
           </section>
         </div>
       </main>
