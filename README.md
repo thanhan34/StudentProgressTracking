@@ -26,10 +26,10 @@ Toàn bộ giao diện sử dụng palette thương hiệu: `#fc5d01`, `#fd7f33`
 ## Thêm, sửa và xóa học viên
 
 - Nhấn **Thêm học viên** trên dashboard để tạo hồ sơ PTE mới.
-- Mã học viên được điền tự động theo dạng `PTE-<UUID>` và không thể sửa. Form không yêu cầu email hoặc số điện thoại; thông tin liên hệ cũ được giữ nguyên trong dữ liệu khi cập nhật hồ sơ.
+- Hệ thống tự tạo một ID nội bộ để lưu dữ liệu nhưng không hiển thị mã học viên trên giao diện. Form không yêu cầu email hoặc số điện thoại; thông tin liên hệ cũ được giữ nguyên trong dữ liệu khi cập nhật hồ sơ.
 - Dùng biểu tượng bút chì trên mỗi dòng hoặc nút **Sửa thông tin** trong hồ sơ để cập nhật.
 - Dùng biểu tượng thùng rác hoặc nút **Xóa học viên**; hệ thống luôn yêu cầu xác nhận trước khi xóa.
-- Form kiểm tra trường bắt buộc, mã học viên trùng, giới hạn điểm PTE và thứ tự ngày bắt đầu/ngày thi.
+- Form kiểm tra trường bắt buộc, giới hạn điểm PTE và thứ tự ngày bắt đầu/ngày thi.
 - Mỗi học viên có thể được phân công **nhiều giảng viên phụ trách** và **nhiều trợ giảng hỗ trợ** trong form thêm/sửa. Nhập tên rồi nhấn Enter, dấu phẩy hoặc nút **Thêm**; có thể xóa từng người bằng nút trên thẻ tên.
 - Có thể tìm kiếm học viên theo tên giảng viên hoặc trợ giảng; hai thông tin này cũng được đưa vào file CSV.
 

@@ -96,7 +96,7 @@ export default function WeeklyUpdateForm({ student, reportIndex, onCancel, onSav
   }
 
   return <div className="modal-backdrop" onClick={onCancel}><form className="student-modal form-modal weekly-form-modal" onSubmit={handleSubmit} onClick={(event) => event.stopPropagation()}>
-    <div className="form-header"><div><h2>{isEditing ? "Sửa báo cáo tuần" : "Cập nhật tình hình tuần"}</h2><p>{student.name} · {student.id}</p></div><button type="button" className="modal-close" onClick={onCancel} aria-label="Đóng"><X /></button></div>
+    <div className="form-header"><div><h2>{isEditing ? "Sửa báo cáo tuần" : "Cập nhật tình hình tuần"}</h2><p>{student.name}</p></div><button type="button" className="modal-close" onClick={onCancel} aria-label="Đóng"><X /></button></div>
     <div className="weekly-form-intro"><ClipboardCheck size={18} /><span>Ghi nhận kết quả học, mock test và tiến độ từng task trong tuần.</span></div>
     <div className="form-section"><h3>Thông tin tuần học</h3><div className="form-grid form-grid-3">
       <FormField label="Tuần học *"><input required value={form.week} onChange={(event) => update("week", event.target.value)} placeholder="Ví dụ: Tuần 5" /></FormField>

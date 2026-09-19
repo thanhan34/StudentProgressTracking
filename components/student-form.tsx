@@ -50,7 +50,7 @@ export default function StudentForm({ student, existingIds, onCancel, onSave }: 
     event.preventDefault();
     const id = form.id.trim().toUpperCase();
     if (!id || !form.name.trim() || !form.startDate) return setError("Vui lòng nhập họ tên và ngày bắt đầu.");
-    if (!isEditing && existingIds.includes(id)) return setError("Mã học viên đã tồn tại.");
+    if (!isEditing && existingIds.includes(id)) return setError("Không thể tạo hồ sơ lúc này. Vui lòng đóng form và thử lại.");
     if (form.examDate && form.examDate < form.startDate) return setError("Ngày thi dự kiến phải sau ngày bắt đầu học.");
 
     const initials = form.name.trim().split(/\s+/).slice(-2).map((part) => part[0]).join("").toUpperCase();
@@ -69,7 +69,6 @@ export default function StudentForm({ student, existingIds, onCancel, onSave }: 
   return <div className="modal-backdrop" onClick={onCancel}><form className="student-modal form-modal" onSubmit={handleSubmit} onClick={(event) => event.stopPropagation()}>
     <div className="form-header"><div><h2>{isEditing ? "Sửa học viên PTE" : "Thêm học viên PTE"}</h2><p>{isEditing ? `Cập nhật thông tin ${student?.name}` : "Nhập hồ sơ và mục tiêu học tập ban đầu."}</p></div><button type="button" className="modal-close" onClick={onCancel} aria-label="Đóng"><X /></button></div>
     <div className="form-section"><h3>Thông tin học viên</h3><div className="form-grid">
-      <FormField label="Mã học viên (tự động)"><input readOnly value={form.id} title={form.id} /><small>Mã được tạo tự động và không thay đổi khi sửa hồ sơ.</small></FormField>
       <FormField label="Họ và tên *"><input required value={form.name} onChange={(event) => update("name", event.target.value)} placeholder="Nguyễn Văn An" /></FormField>
     </div></div>
     <div className="form-section"><h3>Đội ngũ hỗ trợ</h3><div className="form-grid support-form-grid">

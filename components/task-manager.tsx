@@ -81,7 +81,7 @@ export default function TaskManager({ student, onClose, onSave }: TaskManagerPro
   }
 
   return <div className="modal-backdrop" onClick={onClose}><article className="student-modal form-modal task-manager-modal" onClick={(event) => event.stopPropagation()}>
-    <div className="form-header"><div><h2>Quản lý PTE Tasks</h2><p>{currentStudent.name} · {currentStudent.id}</p></div><button type="button" className="modal-close" onClick={onClose} aria-label="Đóng"><X /></button></div>
+    <div className="form-header"><div><h2>Quản lý PTE Tasks</h2><p>{currentStudent.name}</p></div><button type="button" className="modal-close" onClick={onClose} aria-label="Đóng"><X /></button></div>
     <div className="task-manager-toolbar"><div><BookOpenCheck size={18} /><span><strong>{currentStudent.tasks.length} tasks</strong><small>Danh sách task đang theo dõi</small></span></div><button className="button primary compact" onClick={beginAdd} disabled={isSaving}><Plus size={16} />Thêm task</button></div>
     {defaultTaskCodes.some((code) => !currentStudent.tasks.some((task) => task.code.toUpperCase() === code)) && <div className="task-manager-toolbar"><small>Task mặc định: DI, RL, SGD, SWT, HIW, WFD</small><button type="button" className="button secondary compact" disabled={isSaving} onClick={() => void persist({ ...currentStudent, tasks: addMissingDefaultTasks(currentStudent.tasks, currentStudent.skills), lastActive: "Vừa cập nhật tasks" })}><Plus size={16} />Bổ sung task mặc định</button></div>}
 
