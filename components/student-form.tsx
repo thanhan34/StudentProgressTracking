@@ -4,7 +4,7 @@ import { Save, X } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import StaffSelect from "@/components/staff-select";
 import type { AssignedUser } from "@/lib/staff";
-import type { PteSkill, Student, StudentStatus, StudyPhase, TaskProgress } from "@/data/students";
+import { STUDENT_STATUSES, type PteSkill, type Student, type StudentStatus, type StudyPhase, type TaskProgress } from "@/data/students";
 import { generateStudentId } from "@/lib/student-id";
 import { createDefaultTasks } from "@/lib/pte-tasks";
 import { toDateInput } from "@/lib/student-dates";
@@ -26,7 +26,7 @@ type FormState = {
 const defaultForm: FormState = {
   instructorUsers: [], teachingAssistantUsers: [],
   id: "", name: "", instructors: [], teachingAssistants: [], startDate: "", examDate: "",
-  phase: "Nền tảng", status: "Đúng tiến độ", targetScore: 65, currentScore: 30,
+  phase: "Nền tảng", status: "Đang học", targetScore: 65, currentScore: 30,
   attendance: 100, skills: { Speaking: 30, Writing: 30, Reading: 30, Listening: 30 },
 };
 
@@ -82,7 +82,7 @@ export default function StudentForm({ student, existingIds, onCancel, onSave }: 
       <FormField label="Điểm hiện tại"><ScoreInput value={form.currentScore} onChange={(value) => update("currentScore", value)} /></FormField>
       <FormField label="Điểm mục tiêu"><ScoreInput value={form.targetScore} onChange={(value) => update("targetScore", value)} /></FormField>
       <FormField label="Chuyên cần (%)"><input type="number" min="0" max="100" value={form.attendance} onChange={(event) => update("attendance", Number(event.target.value))} /></FormField>
-      <FormField label="Trạng thái"><select value={form.status} onChange={(event) => update("status", event.target.value as StudentStatus)}><option>Đúng tiến độ</option><option>Cần chú ý</option><option>Sắp thi</option></select></FormField>
+      <FormField label="Trạng thái"><select value={form.status} onChange={(event) => update("status", event.target.value as StudentStatus)}>{STUDENT_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}</select></FormField>
     </div></div>
     <div className="form-section"><h3>Điểm theo kỹ năng</h3><div className="skill-inputs">{(Object.keys(form.skills) as PteSkill[]).map((skill) => <FormField label={skill} key={skill}><ScoreInput value={form.skills[skill]} onChange={(value) => updateSkill(skill, value)} /></FormField>)}</div></div>
     {error && <div className="form-error" role="alert">{error}</div>}

@@ -1,6 +1,11 @@
 import type { AssignedUser } from "../lib/staff";
 
-export type StudentStatus = "Đúng tiến độ" | "Cần chú ý" | "Sắp thi";
+export const STUDENT_STATUSES = ["Đã đăng ký thi", "Đã thi đậu", "Đang học", "Bảo Lưu", "Bỏ học"] as const;
+export type StudentStatus = typeof STUDENT_STATUSES[number];
+
+export function normalizeStudentStatus(value: unknown): StudentStatus {
+  return STUDENT_STATUSES.find((status) => status === value) ?? "Đang học";
+}
 export type StudyPhase = "Nền tảng" | "Luyện task" | "Mock test" | "Nước rút";
 export type PteSkill = "Speaking" | "Writing" | "Reading" | "Listening";
 

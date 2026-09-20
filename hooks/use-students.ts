@@ -2,7 +2,7 @@
 
 import { collection, deleteDoc, doc, getDocs, setDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import type { Student } from "@/data/students";
+import { normalizeStudentStatus, type Student } from "@/data/students";
 import { db, isFirebaseConfigured } from "@/lib/firebase";
 
 export function useStudents() {
@@ -90,6 +90,7 @@ function normalizeStudent(value: unknown): Student {
   const { instructor, teachingAssistant, ...currentStudent } = student;
   return {
     ...currentStudent,
+    status: normalizeStudentStatus(student.status),
     instructors: normalizeNames(student.instructors, instructor),
     teachingAssistants: normalizeNames(student.teachingAssistants, teachingAssistant),
     color: normalizeBrandColor(student.color),

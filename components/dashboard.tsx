@@ -12,7 +12,7 @@ import { useMemo, useState } from "react";
 import Image from "next/image";
 import brandLogo from "@/images/logo/white-logo.png";
 import {
-  type PteSkill, type Student,
+  STUDENT_STATUSES, type PteSkill, type Student,
   type StudentStatus,
 } from "@/data/students";
 import StudentForm from "@/components/student-form";
@@ -34,9 +34,11 @@ const navItems = [
 ];
 
 const statusStyle: Record<StudentStatus, string> = {
-  "Đúng tiến độ": "status success",
-  "Cần chú ý": "status warning",
-  "Sắp thi": "status exam",
+  "Đã đăng ký thi": "status exam",
+  "Đã thi đậu": "status success",
+  "Đang học": "status success",
+  "Bảo Lưu": "status warning",
+  "Bỏ học": "status neutral",
 };
 
 const skillIcons = { Speaking: Mic2, Writing: PenLine, Reading: BookOpenCheck, Listening: Headphones };
@@ -47,7 +49,8 @@ export default function Dashboard({ currentUserId, initialAssigneeFilter }: { cu
   const [assigneeFilter, setAssigneeFilter] = useState(initialAssigneeFilter);
   const { studentList, isLoading, storageError, saveStudent, removeStudent } = useStudents();
   const upcomingExams = studentList.filter((student) => isUpcomingExam(student.examDate));
-  const needsAttention = studentList.filter((student) => student.status === "Cần chú ý");
+  const reservedStudents = studentList.filter((student) => student.status === "Bảo Lưu");
+  const studyingStudents = studentList.filter((student) => student.status === "Đang học" || student.status === "Đã đăng ký thi");
   const reports = studentList.flatMap((student) => student.weeklyReports);
   const averageScore = studentList.length ? (studentList.reduce((sum, student) => sum + student.currentScore, 0) / studentList.length).toFixed(1) : "—";
   const allTasks = studentList.flatMap((student) => student.tasks);
@@ -137,7 +140,7 @@ export default function Dashboard({ currentUserId, initialAssigneeFilter }: { cu
           <button><Settings size={19} /><span>Cài đặt</span></button>
           <button><CircleHelp size={19} /><span>Trợ giúp</span></button>
         </nav>
-        <div className="upgrade-card"><span className="upgrade-icon"><Target size={20} /></span><strong>Tình hình học viên</strong><p>{isLoading ? "Đang tải..." : storageError ? "Chưa tải được dữ liệu." : `${upcomingExams.length} học viên sắp thi và ${needsAttention.length} học viên cần hỗ trợ.`}</p><button onClick={() => setStatusFilter("Cần chú ý")}>Xem học viên cần hỗ trợ</button></div>
+        <div className="upgrade-card"><span className="upgrade-icon"><Target size={20} /></span><strong>Tình hình học viên</strong><p>{isLoading ? "Đang tải..." : storageError ? "Chưa tải được dữ liệu." : `${upcomingExams.length} học viên sắp thi và ${reservedStudents.length} học viên bảo lưu.`}</p><button onClick={() => setStatusFilter("Bảo Lưu")}>Xem học viên bảo lưu</button></div>
         <div className="sidebar-profile"><AuthControls /></div>
       </aside>
       {menuOpen && <button className="backdrop" onClick={() => setMenuOpen(false)} aria-label="Đóng menu" />}
@@ -159,10 +162,10 @@ export default function Dashboard({ currentUserId, initialAssigneeFilter }: { cu
           {storageError && <div className="storage-error"><AlertTriangle size={16} />{storageError}</div>}
 
           <section className="metrics-grid" aria-label="Chỉ số PTE tổng quan">
-            <MetricCard icon={Users} color="purple" label="Học viên đang học" value={metricValue(String(studentList.length))} detail="Theo danh sách đã lưu" />
+            <MetricCard icon={Users} color="purple" label="Học viên đang học" value={metricValue(String(studyingStudents.length))} detail="Đang học hoặc đã đăng ký thi" />
             <MetricCard icon={CalendarClock} color="blue" label="Sắp thi trong 30 ngày" value={metricValue(String(upcomingExams.length))} detail="Theo ngày thi dự kiến" />
             <MetricCard icon={BarChart3} color="green" label="Điểm PTE trung bình" value={metricValue(averageScore)} detail="Theo điểm hiện tại" />
-            <MetricCard icon={AlertTriangle} color="orange" label="Học viên cần chú ý" value={metricValue(String(needsAttention.length))} detail="Theo trạng thái đã lưu" />
+            <MetricCard icon={AlertTriangle} color="orange" label="Học viên bảo lưu" value={metricValue(String(reservedStudents.length))} detail="Theo trạng thái đã lưu" />
           </section>
 
           <section className="charts-grid">
@@ -189,7 +192,7 @@ export default function Dashboard({ currentUserId, initialAssigneeFilter }: { cu
                 {staff.filter((user) => user.id !== currentUserId).map((user) => <option key={user.id} value={user.id}>{user.name} — {ROLE_LABELS[user.role]} ({user.id.slice(-6)})</option>)}
                 {staffLoading && <option disabled>Đang tải người phụ trách...</option>}
               </select>
-              <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} aria-label="Lọc trạng thái"><option>Tất cả trạng thái</option><option>Đúng tiến độ</option><option>Cần chú ý</option><option>Sắp thi</option></select>
+              <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} aria-label="Lọc trạng thái"><option>Tất cả trạng thái</option>{STUDENT_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}</select>
             </div>
             <div className="table-wrapper"><table className="pte-table"><thead><tr><th>HỌC VIÊN</th><th>NGÀY BẮT ĐẦU</th><th>KỲ THI DỰ KIẾN</th><th>ĐIỂM PTE</th><th>TASK YẾU</th><th>TUẦN GẦN NHẤT</th><th>TRẠNG THÁI</th><th /></tr></thead>
               <tbody>{filteredStudents.map((student) => { const weakTask = weakestTask(student); const latestWeek = student.weeklyReports.at(-1); return <tr key={student.id} onClick={() => setSelectedStudent(student)}><td><div className="student-cell"><span className="student-avatar" style={{ background: `${student.color}18`, color: student.color }}>{student.initials}</span><div><strong>{student.name}</strong><small>{student.phase}</small><span className="support-summary">GV: {supportNames(student.instructors)} · TG: {supportNames(student.teachingAssistants)}</span></div></div></td><td><strong className="date-value">{formatDate(student.startDate)}</strong><small>Đã học {weeksStudied(student.startDate)} tuần</small></td><td><strong className="date-value">{formatDate(student.examDate)}</strong><small className={isUpcomingExam(student.examDate) ? "exam-soon" : ""}>{examCountdown(student.examDate)}</small></td><td><div className="score-progress"><strong>{student.currentScore}<span>/{student.targetScore}</span></strong><div><i style={{ width: `${student.currentScore / student.targetScore * 100}%` }} /></div></div></td><td>{weakTask ? <span className="weak-task"><b>{weakTask.code}</b><small>{weakTask.score}/{weakTask.target}</small></span> : <small>Chưa có task</small>}</td><td>{latestWeek ? <><strong>{latestWeek.tasksCompleted} task</strong><small>Mock {latestWeek.mockScore} · CC {latestWeek.attendance}%</small></> : <small>Chưa có báo cáo</small>}</td><td><span className={statusStyle[student.status]}><i />{student.status}</span></td><td><div className="row-actions"><button className="tasks" onClick={(event) => { event.stopPropagation(); setManagingTasks(student); }} aria-label={`Quản lý tasks của ${student.name}`} title="Quản lý tasks"><BookOpenCheck size={15} /></button><button className="weekly" onClick={(event) => { event.stopPropagation(); setWeeklyUpdate({ student }); }} aria-label={`Cập nhật tuần cho ${student.name}`} title="Cập nhật tuần"><ClipboardList size={15} /></button><button className="edit" onClick={(event) => { event.stopPropagation(); setEditingStudent(student); }} aria-label={`Sửa ${student.name}`} title="Sửa"><Pencil size={15} /></button><button className="delete" onClick={(event) => { event.stopPropagation(); setDeletingStudent(student); }} aria-label={`Xóa ${student.name}`} title="Xóa"><Trash2 size={15} /></button></div></td></tr>; })}</tbody>
