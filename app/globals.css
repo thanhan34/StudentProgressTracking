@@ -186,9 +186,23 @@ button { cursor: pointer; }
 .table-search { display: flex; width: 270px; height: 33px; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: 8px; padding: 0 10px; color: #a2a7b6; }
 .table-search button { display: grid; border: 0; padding: 0; place-items: center; background: transparent; }
 .table-tools select { height: 33px; border: 1px solid var(--line); border-radius: 8px; outline: 0; padding: 0 29px 0 10px; color: #72798d; background: white; font-size: 9px; }
+.student-status-filter { position: relative; min-width: 135px; max-width: 100%; color: #72798d; font-size: 9px; }
+.student-status-filter summary { min-height: 33px; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; background: white; cursor: pointer; }
+.student-status-filter summary:focus-visible, .student-status-options button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.student-status-options { position: absolute; z-index: 20; top: calc(100% + 5px); right: 0; width: 270px; max-width: calc(100vw - 64px); border: 1px solid var(--line); border-radius: 10px; padding: 12px; background: white; box-shadow: 0 8px 24px #30251f1a; }
+.student-status-filter-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.student-status-filter-actions button { border: 0; padding: 3px 0; color: var(--primary-dark); background: transparent; }
+.student-status-options fieldset { min-width: 0; margin: 0; border: 0; padding: 0; }
+.student-status-options legend { margin-bottom: 6px; font-weight: 600; }
+.student-status-options label { display: flex; align-items: center; gap: 8px; padding: 8px 4px; cursor: pointer; }
+.student-status-options label:hover { background: #fff8f3; }
+.student-status-options input { width: 14px; height: 14px; accent-color: var(--primary); }
+.student-status-options p { margin: 8px 0 0; }
+.students-card:has(.student-status-filter[open]) { overflow: visible; }
 .table-wrapper { overflow-x: auto; border-top: 1px solid var(--line); }
 table { width: 100%; min-width: 950px; border-collapse: collapse; }
-.pte-table { min-width: 1210px; }
+.pte-table { min-width: 680px; }
+.student-status-section > .status { font-size: 12px; padding: 8px 14px; }
 th { height: 39px; padding: 0 12px; color: #a2a6b5; background: #fafbfc; font-size: 8px; font-weight: 650; text-align: left; letter-spacing: .3px; }
 th:first-child, td:first-child { padding-left: 22px; }
 td { height: 72px; border-top: 1px solid #f0f1f5; padding: 0 12px; font-size: 9px; }
