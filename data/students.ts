@@ -28,6 +28,7 @@ export type Student = {
   instructorUsers?: AssignedUser[]; teachingAssistantUsers?: AssignedUser[];
   phase: StudyPhase; startDate: string; examDate?: string; targetScore: number;
   currentScore: number; attendance: number; status: StudentStatus; color: string;
+  passedRecordedDate?: string;
   lastActive: string; skills: Record<PteSkill, number>; tasks: TaskProgress[];
   weeklyReports: WeeklyReport[];
 };

@@ -8,6 +8,7 @@ import { STUDENT_STATUSES, type PteSkill, type Student, type StudentStatus, type
 import { generateStudentId } from "@/lib/student-id";
 import { createDefaultTasks } from "@/lib/pte-tasks";
 import { toDateInput } from "@/lib/student-dates";
+import { isValidRecordedDate, withPassedRecordedDate } from "@/lib/honor-ranking";
 
 type StudentFormProps = {
   student: Student | null;
@@ -17,6 +18,7 @@ type StudentFormProps = {
 };
 
 type FormState = {
+  passedRecordedDate: string;
   instructorUsers: AssignedUser[]; teachingAssistantUsers: AssignedUser[];
   id: string; name: string; instructors: string[]; teachingAssistants: string[]; startDate: string;
   examDate: string; phase: StudyPhase; status: StudentStatus; targetScore: number;
@@ -24,6 +26,7 @@ type FormState = {
 };
 
 const defaultForm: FormState = {
+  passedRecordedDate: "",
   instructorUsers: [], teachingAssistantUsers: [],
   id: "", name: "", instructors: [], teachingAssistants: [], startDate: "", examDate: "",
   phase: "Nền tảng", status: "Đang học", targetScore: 65, currentScore: 30,
@@ -32,6 +35,7 @@ const defaultForm: FormState = {
 
 export default function StudentForm({ student, existingIds, onCancel, onSave }: StudentFormProps) {
   const [form, setForm] = useState<FormState>(() => student ? {
+    passedRecordedDate: student.passedRecordedDate ?? "",
     instructorUsers: student.instructorUsers ?? [], teachingAssistantUsers: student.teachingAssistantUsers ?? [],
     id: student.id, name: student.name,
     instructors: [...student.instructors], teachingAssistants: [...student.teachingAssistants],
@@ -52,6 +56,10 @@ export default function StudentForm({ student, existingIds, onCancel, onSave }: 
     if (!id || !form.name.trim() || !form.startDate) return setError("Vui lòng nhập họ tên và ngày bắt đầu.");
     if (!isEditing && existingIds.includes(id)) return setError("Không thể tạo hồ sơ lúc này. Vui lòng đóng form và thử lại.");
     if (form.examDate && form.examDate < form.startDate) return setError("Ngày thi dự kiến phải sau ngày bắt đầu học.");
+    if (form.status === "Đã thi đậu" && student?.status === "Đã thi đậu" && !isValidRecordedDate(student.passedRecordedDate)
+      && (!isValidRecordedDate(form.passedRecordedDate) || form.passedRecordedDate > toDateInput())) {
+      return setError("Vui lòng bổ sung ngày ghi nhận thi đậu hợp lệ, không sau hôm nay.");
+    }
 
     const initials = form.name.trim().split(/\s+/).slice(-2).map((part) => part[0]).join("").toUpperCase();
     const tasks: TaskProgress[] = student?.tasks ?? createDefaultTasks(form.skills);
@@ -63,7 +71,7 @@ export default function StudentForm({ student, existingIds, onCancel, onSave }: 
 
     setIsSaving(true);
     setError("");
-    try { await onSave(result); } catch { setError("Không thể lưu học viên. Vui lòng thử lại."); setIsSaving(false); }
+    try { await onSave(withPassedRecordedDate(result, student ?? undefined)); } catch { setError("Không thể lưu học viên. Vui lòng thử lại."); setIsSaving(false); }
   }
 
   return <div className="modal-backdrop" onClick={onCancel}><form className="student-modal form-modal" onSubmit={handleSubmit} onClick={(event) => event.stopPropagation()}>
@@ -83,6 +91,11 @@ export default function StudentForm({ student, existingIds, onCancel, onSave }: 
       <FormField label="Điểm mục tiêu"><ScoreInput value={form.targetScore} onChange={(value) => update("targetScore", value)} /></FormField>
       <FormField label="Chuyên cần (%)"><input type="number" min="0" max="100" value={form.attendance} onChange={(event) => update("attendance", Number(event.target.value))} /></FormField>
       <FormField label="Trạng thái"><select value={form.status} onChange={(event) => update("status", event.target.value as StudentStatus)}>{STUDENT_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}</select></FormField>
+      {form.status === "Đã thi đậu" && <FormField label="Ngày ghi nhận thi đậu">
+        {student?.status === "Đã thi đậu" && !isValidRecordedDate(student.passedRecordedDate)
+          ? <><input required type="date" max={toDateInput()} value={form.passedRecordedDate} onChange={(event) => update("passedRecordedDate", event.target.value)} /><small>Hồ sơ cũ: bổ sung ngày ghi nhận để tính xếp hạng tháng/năm.</small></>
+          : <><input type="date" readOnly value={student?.status === "Đã thi đậu" ? student.passedRecordedDate : toDateInput()} /><small>Tự ghi ngày khi lưu trạng thái thi đậu; không thay đổi khi sửa thông tin khác.</small></>}
+      </FormField>}
     </div></div>
     <div className="form-section"><h3>Điểm theo kỹ năng</h3><div className="skill-inputs">{(Object.keys(form.skills) as PteSkill[]).map((skill) => <FormField label={skill} key={skill}><ScoreInput value={form.skills[skill]} onChange={(value) => updateSkill(skill, value)} /></FormField>)}</div></div>
     {error && <div className="form-error" role="alert">{error}</div>}

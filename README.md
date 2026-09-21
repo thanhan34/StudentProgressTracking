@@ -79,6 +79,23 @@ Danh sách giảng viên và trợ giảng được lưu tại `instructors: str
 
 ## Scripts
 
+### Vinh danh
+
+#### Xếp hạng giảng viên theo tháng/năm
+
+- Trong **Vinh danh**, chọn **Theo tháng** hoặc **Theo năm**, sau đó chọn kỳ thống kê. Bảng xếp giảm dần theo số học viên thi đậu; bằng số lượng thì đồng hạng (ví dụ 1, 1, 3).
+- `passedRecordedDate` lưu ngày chuyển trạng thái sang **Đã thi đậu**, theo ngày địa phương trên thiết bị. Sửa hồ sơ hoặc task không đổi ngày đã ghi nhận. Chuyển khỏi trạng thái thi đậu sẽ xóa ngày; chuyển lại ghi ngày mới.
+- Hồ sơ cũ đã thi đậu nhưng chưa có ngày không được tự gán ngày hôm nay. Mở hồ sơ, chọn **Sửa**, bổ sung **Ngày ghi nhận thi đậu** rồi lưu. Ngày bổ sung không được sau hôm nay.
+- Mỗi học viên chỉ tính một lần cho mỗi giảng viên phụ trách, kể cả có nhiều phân công. Có thể mở danh sách học viên từ số lượng trong bảng. Bộ lọc tìm kiếm vinh danh không ảnh hưởng thứ hạng.
+- Bảng xếp hạng chỉ dành cho giảng viên được phân công trong hồ sơ hiện tại; không phải snapshot phân công lịch sử. Thay đổi phân công hoặc trạng thái học viên có thể thay đổi kết quả kỳ cũ. Phần tri ân trợ giảng và trợ giảng dự bị vẫn giữ nguyên.
+- Các tài khoản được phân biệt bằng ID. Dữ liệu cũ chỉ có tên được gộp theo tên, không thể phân biệt chính xác hai người trùng tên khi chưa liên kết tài khoản.
+
+- Mục **Vinh danh** tự động hiển thị học viên có trạng thái **Đã thi đậu**, độc lập với các bộ lọc của bảng học viên.
+- Tổng hợp người đồng hành từ hồ sơ, task hiện tại và kết quả task trong tất cả báo cáo tuần còn lưu; gộp tài khoản theo ID, không gộp hai tài khoản chỉ vì trùng tên.
+- Giảng viên được xác định theo phân công trong hồ sơ; trợ giảng và trợ giảng dự bị được đối chiếu theo vai trò tài khoản hiện tại. Tên cũ không có tài khoản vẫn được giữ và ghi rõ khi chưa xác định được vai trò.
+- Có thể tìm theo tên học viên/người hỗ trợ và mở hồ sơ từ thẻ vinh danh. Không dùng điểm hiện tại hoặc ngày thi dự kiến như kết quả thi chính thức.
+- Không thể khôi phục người hỗ trợ đã bị xóa khỏi toàn bộ dữ liệu; tính năng không lưu snapshot vai trò tại thời điểm thi đậu.
+
 - `npm run dev`: chạy môi trường phát triển.
 - `npm run lint`: kiểm tra ESLint.
 - `npm run build`: tạo production build.

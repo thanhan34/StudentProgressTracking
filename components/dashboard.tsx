@@ -16,6 +16,7 @@ import {
   type StudentStatus,
 } from "@/data/students";
 import StudentForm from "@/components/student-form";
+import Honors from "@/components/honors";
 import StudentStatusFilter from "@/components/student-status-filter";
 import { DEFAULT_STUDENT_STATUSES, matchesStudentStatus } from "@/lib/student-status-filter";
 import TaskManager from "@/components/task-manager";
@@ -25,11 +26,13 @@ import AuthControls from "@/components/auth-controls";
 import { useStaff } from "@/components/staff-provider";
 import { ROLE_LABELS } from "@/lib/roles";
 import { matchesStudentAssignee } from "@/lib/student-assignment";
+import { sortStudentsByExam } from "@/lib/student-sorting";
 import { formatStudentDate as formatDate, daysUntilExam, isUpcomingExam, examCountdown } from "@/lib/student-dates";
 
 const navItems = [
   { label: "Tổng quan", icon: LayoutDashboard },
   { label: "Học viên PTE", icon: Users },
+  { label: "Vinh danh", icon: UserCheck },
   { label: "PTE Tasks", icon: BookOpenCheck },
   { label: "Báo cáo tuần", icon: ClipboardList },
   { label: "Lịch thi", icon: CalendarDays },
@@ -75,13 +78,13 @@ export default function Dashboard({ currentUserId, initialAssigneeFilter }: { cu
 
   const filteredStudents = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase("vi");
-    return studentList.filter((student) => {
+    return sortStudentsByExam(studentList.filter((student) => {
       const searchable = `${student.name} ${student.instructors.join(" ")} ${student.teachingAssistants.join(" ")} ${student.tasks.map((task) => task.code).join(" ")}`.toLocaleLowerCase("vi");
       return (!normalizedQuery || searchable.includes(normalizedQuery))
         && matchesStudentAssignee(student, assigneeFilter)
         && (phaseFilter === "Tất cả giai đoạn" || student.phase === phaseFilter)
         && matchesStudentStatus(student.status, statusFilter);
-    });
+    }));
   }, [phaseFilter, query, statusFilter, studentList, assigneeFilter]);
   const selectedIndex = filteredStudents.findIndex((student) => student.id === selectedStudent?.id);
   const nextStudent = selectedIndex >= 0 ? filteredStudents[selectedIndex + 1] : undefined;
@@ -156,6 +159,7 @@ export default function Dashboard({ currentUserId, initialAssigneeFilter }: { cu
         </header>
 
         <div className="page-content">
+          {activeNav === "Vinh danh" ? <Honors students={studentList} loading={isLoading} error={storageError} onSelect={setSelectedStudent} /> : <>
           <section className="welcome-row">
             <div><p className="eyebrow">{new Intl.DateTimeFormat("vi-VN", { dateStyle: "full" }).format(new Date())}</p><h1>Tổng quan lớp PTE <span>👋</span></h1><p>Theo dõi lịch thi, điểm số và kết quả luyện task hằng tuần.</p></div>
             <div className="welcome-actions"><button className="button secondary" onClick={exportCsv}><Download size={18} />Xuất báo cáo</button><button className="button primary" onClick={() => setEditingStudent(null)}><UserPlus size={18} />Thêm học viên</button></div>
@@ -202,6 +206,7 @@ export default function Dashboard({ currentUserId, initialAssigneeFilter }: { cu
             {staffError && <div className="assignment-filter-note" role="alert">{staffError} <button type="button" className="text-button" onClick={reloadStaff}>Thử lại</button></div>}
             <div className="table-footer"><span>Hiển thị {filteredStudents.length} trên {studentList.length} học viên PTE{assigneeFilter === currentUserId ? " · Tôi phụ trách" : ""}</span><div><button disabled>Trước</button><button className="page-active">1</button><button disabled>Sau</button></div></div>
           </section>
+          </>}
         </div>
       </main>
 

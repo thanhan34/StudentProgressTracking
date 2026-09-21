@@ -4,6 +4,7 @@ import { collection, deleteDoc, doc, getDocs, setDoc } from "firebase/firestore"
 import { useEffect, useState } from "react";
 import { normalizeStudentStatus, type Student } from "@/data/students";
 import { db, isFirebaseConfigured } from "@/lib/firebase";
+import { withPassedRecordedDate } from "@/lib/honor-ranking";
 
 export function useStudents() {
   const [studentList, setStudentList] = useState<Student[]>([]);
@@ -36,6 +37,7 @@ export function useStudents() {
 
   async function saveStudent(student: Student) {
     const previous = studentList;
+    student = withPassedRecordedDate(student, previous.find((item) => item.id === student.id));
     const next = previous.some((item) => item.id === student.id)
       ? previous.map((item) => item.id === student.id ? student : item)
       : [student, ...previous];
