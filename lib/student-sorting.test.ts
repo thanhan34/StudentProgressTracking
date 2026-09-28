@@ -1,10 +1,34 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import type { Student } from "../data/students";
+import { STUDENT_TAGS, type Student } from "../data/students";
 import { sortStudentsByExam } from "./student-sorting";
 
 const now = new Date(2026, 8, 21, 15);
 const student = (id: string, examDate?: string, status: Student["status"] = "Đang học") => ({ id, examDate, status });
+
+test("each supported tag prioritizes students above untagged booked students", () => {
+  for (const tag of STUDENT_TAGS) {
+    const students = [student("booked", "2026-09-21", "Đã đăng ký thi"), { ...student("tagged"), tags: [tag] }];
+    assert.deepEqual(sortStudentsByExam(students, now).map((s) => s.id), ["tagged", "booked"]);
+  }
+});
+
+test("tagged groups preserve booking and exam ordering without ranking tags or counting them", () => {
+  const students = [
+    { ...student("tagged-far", "2026-10-01"), tags: [...STUDENT_TAGS] },
+    student("untagged", "2026-09-21", "Đã đăng ký thi"),
+    { ...student("tagged-near", "2026-09-22"), tags: [STUDENT_TAGS[0]] },
+    { ...student("tagged-booked", undefined, "Đã đăng ký thi"), tags: [STUDENT_TAGS[2]] },
+  ];
+  const original = [...students];
+  assert.deepEqual(sortStudentsByExam(students, now).map((s) => s.id), ["tagged-booked", "tagged-near", "tagged-far", "untagged"]);
+  assert.deepEqual(students, original);
+});
+
+test("empty tags behave like legacy profiles without tags", () => {
+  const students = [{ ...student("empty"), tags: [] }, student("legacy")];
+  assert.deepEqual(sortStudentsByExam(students, now).map((s) => s.id), ["empty", "legacy"]);
+});
 
 test("booked students come first, then upcoming dates ascending within each group", () => {
   const students = [student("near", "2026-09-22"), student("booked-far", "2026-10-10", "Đã đăng ký thi"),

@@ -3,6 +3,8 @@
 import { Save, X } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import StaffSelect from "@/components/staff-select";
+import { StudentTagInput } from "@/components/ui/student-tags";
+import { normalizeStudentTags, type StudentTag } from "@/data/students";
 import type { AssignedUser } from "@/lib/staff";
 import { STUDENT_STATUSES, type PteSkill, type Student, type StudentStatus, type StudyPhase, type TaskProgress } from "@/data/students";
 import { generateStudentId } from "@/lib/student-id";
@@ -18,6 +20,7 @@ type StudentFormProps = {
 };
 
 type FormState = {
+  tags: StudentTag[];
   passedRecordedDate: string;
   instructorUsers: AssignedUser[]; teachingAssistantUsers: AssignedUser[];
   id: string; name: string; instructors: string[]; teachingAssistants: string[]; startDate: string;
@@ -26,6 +29,7 @@ type FormState = {
 };
 
 const defaultForm: FormState = {
+  tags: [],
   passedRecordedDate: "",
   instructorUsers: [], teachingAssistantUsers: [],
   id: "", name: "", instructors: [], teachingAssistants: [], startDate: "", examDate: "",
@@ -35,6 +39,7 @@ const defaultForm: FormState = {
 
 export default function StudentForm({ student, existingIds, onCancel, onSave }: StudentFormProps) {
   const [form, setForm] = useState<FormState>(() => student ? {
+    tags: normalizeStudentTags(student.tags),
     passedRecordedDate: student.passedRecordedDate ?? "",
     instructorUsers: student.instructorUsers ?? [], teachingAssistantUsers: student.teachingAssistantUsers ?? [],
     id: student.id, name: student.name,
@@ -98,6 +103,7 @@ export default function StudentForm({ student, existingIds, onCancel, onSave }: 
       </FormField>}
     </div></div>
     <div className="form-section"><h3>Điểm theo kỹ năng</h3><div className="skill-inputs">{(Object.keys(form.skills) as PteSkill[]).map((skill) => <FormField label={skill} key={skill}><ScoreInput value={form.skills[skill]} onChange={(value) => updateSkill(skill, value)} /></FormField>)}</div></div>
+    <div className="form-section"><StudentTagInput value={form.tags} onChange={(tags) => update("tags", tags)} disabled={isSaving} /></div>
     {error && <div className="form-error" role="alert">{error}</div>}
     <div className="form-actions"><button type="button" className="button secondary" onClick={onCancel}>Hủy</button><button type="submit" className="button primary" disabled={isSaving}><Save size={17} />{isSaving ? "Đang lưu..." : isEditing ? "Lưu thay đổi" : "Thêm học viên"}</button></div>
   </form></div>;

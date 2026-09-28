@@ -25,6 +25,11 @@ Toàn bộ giao diện sử dụng palette thương hiệu: `#fc5d01`, `#fd7f33`
 
 ## Thêm, sửa và xóa học viên
 
+- Trong hồ sơ học viên, ngày thi dự kiến và điểm hiện tại/mục tiêu của task sửa trực tiếp và tự lưu khi rời ô. Giảng viên/trợ giảng và người phụ trách task tự lưu khi chọn hoặc bỏ người. Phần tiến độ PTE tasks không hiển thị số câu đã luyện, ghi chú tiến độ và hạn chế; dữ liệu cũ vẫn được giữ nguyên. Mỗi ô có trạng thái lưu, giữ bản nháp khi lỗi và nút thử lại/hoàn tác. Chờ lưu hoàn tất trước khi đóng hoặc chuyển hồ sơ. Thêm/xóa task vẫn ở **Quản lý tasks**; sửa tiến độ hiện tại không thay đổi snapshot báo cáo tuần cũ.
+
+- **Tag học viên:** bấm vào học viên để mở hồ sơ, chọn/bỏ tag **Có thể thi được**, **Cần thi gấp**, **Cần hỗ trợ đặc biệt** để tự lưu ngay, không cần mở form sửa hoặc nhấn lưu. Trong lúc lưu, các lựa chọn tag tạm khóa; nếu lưu lỗi, lựa chọn trước đó được khôi phục và có thông báo để thử lại. Form thêm/sửa vẫn hỗ trợ chọn tag khi lưu hồ sơ. Tag độc lập với trạng thái và đánh giá thi trong báo cáo tuần, không tự động suy ra từ điểm số.
+- Tag hiển thị trong danh sách tiến độ và hồ sơ học viên; dùng bộ lọc **Tất cả tag** để lọc theo từng tag. CSV có thêm cột Tag. Hồ sơ cũ chưa có tag vẫn hoạt động bình thường.
+
 - Nhấn **Thêm học viên** trên dashboard để tạo hồ sơ PTE mới.
 - Hệ thống tự tạo một ID nội bộ để lưu dữ liệu nhưng không hiển thị mã học viên trên giao diện. Form không yêu cầu email hoặc số điện thoại; thông tin liên hệ cũ được giữ nguyên trong dữ liệu khi cập nhật hồ sơ.
 - Dùng biểu tượng bút chì trên mỗi dòng hoặc nút **Sửa thông tin** trong hồ sơ để cập nhật.

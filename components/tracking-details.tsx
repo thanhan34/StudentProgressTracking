@@ -1,5 +1,5 @@
 import type { TaskNotes, WeeklyReport } from "@/data/students";
-import { EXAM_LABELS, HOMEWORK_LABELS } from "@/lib/student-tracking";
+import { weeklyTrackingEntries } from "@/lib/student-tracking";
 
 function hasTaskNotes(task: TaskNotes) {
   return Boolean(task.assignees?.some((name) => name.trim()) || task.progressText?.trim() || task.limitations?.trim());
@@ -17,14 +17,13 @@ export function TaskNotesDetails({ task }: { task: TaskNotes }) {
 }
 
 export function WeeklyTrackingDetails({ report }: { report: WeeklyReport }) {
+  const entries = weeklyTrackingEntries(report);
+  const tasks = report.taskResults?.filter(hasTaskNotes) ?? [];
+  if (!entries.length && !tasks.length) return null;
   return <div className="weekly-tracking-details">
-    <dl className="tracking-details">
-      <div><dt>Vắng có phép</dt><dd>{report.excusedAbsences == null ? "Chưa ghi nhận" : `${report.excusedAbsences} buổi`}</dd></div>
-      <div><dt>Vắng không phép</dt><dd>{report.unexcusedAbsences == null ? "Chưa ghi nhận" : `${report.unexcusedAbsences} buổi`}</dd></div>
-      <div><dt>Bài tập về nhà</dt><dd>{HOMEWORK_LABELS[report.homeworkStatus ?? "not_recorded"]}</dd></div>
-      <div><dt>Đánh giá thi</dt><dd>{EXAM_LABELS[report.examRecommendation ?? "not_assessed"]}</dd></div>
-      <div><dt>Hạn chế trong tuần</dt><dd>{report.limitations || "Chưa ghi nhận"}</dd></div>
-    </dl>
-    {report.taskResults?.filter(hasTaskNotes).map((task) => <details key={task.code}><summary>Tiến độ {task.code} trong tuần</summary><TaskNotesDetails task={task} /></details>)}
+    {entries.length > 0 && <dl className="tracking-details">
+      {entries.map(({ label, value }) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}
+    </dl>}
+    {tasks.map((task) => <details key={task.code}><summary>Tiến độ {task.code} trong tuần</summary><TaskNotesDetails task={task} /></details>)}
   </div>;
 }

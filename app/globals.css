@@ -60,7 +60,48 @@
   --line: #f2dfd3;
   --background: #fff8f3;
   --card: #ffffff;
+  --tag-background: var(--background);
+  --tag-selected: var(--primary-soft);
+  --tag-text: var(--primary-dark);
+  --tag-border: var(--primary-light);
+  --tag-radius: 999px;
 }
+
+.student-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.student-tag-editor { margin-top: 16px; }
+.student-weekly-limitations { margin-top: 16px; }
+.inline-save-field { min-width: 0; }
+.inline-save-field > fieldset { min-width: 0; border: 0; padding: 0; margin: 0; }
+.inline-save-field > fieldset:disabled { opacity: .65; }
+.inline-save-status { display: block; min-height: 20px; margin-top: 4px; color: var(--muted); font-size: 12px; }
+.inline-save-error { display: flex; flex-wrap: wrap; gap: 8px; color: var(--primary-dark); font-size: 12px; }
+.inline-save-error button { min-height: 44px; }
+.inline-navigation-error { position: sticky; top: 0; z-index: 2; border: 1px solid var(--primary-light); border-radius: 8px; padding: 12px; background: var(--background); color: var(--primary-dark); font-size: 12px; }
+.inline-save-hint { color: var(--muted); font-size: 12px; line-height: 1.6; margin: 8px 0 16px; }
+.inline-support-grid, .inline-task-list { display: grid; gap: 16px; }
+.inline-task-card { border: 1px solid var(--line); border-radius: 12px; padding: 16px; background: var(--background); }
+.inline-task-card > header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.inline-task-card > header small { display: block; color: var(--muted); margin-top: 4px; }
+.inline-task-numbers { display: grid; gap: 12px; }
+.inline-save-field input, .inline-save-field select { min-height: 44px; }
+.inline-save-field input:focus-visible, .inline-save-field select:focus-visible, .inline-save-field textarea:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+@media (min-width: 600px) {
+  .inline-support-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .inline-task-numbers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.student-tag-feedback { min-height: 20px; margin: 8px 0 0; color: var(--muted); font-size: 12px; }
+.student-tag { display: inline-flex; border: 1px solid var(--tag-border); border-radius: var(--tag-radius); padding: 4px 8px; background: var(--tag-background); color: var(--tag-text); font-size: 12px; font-weight: 500; }
+.student-tag-fieldset { min-width: 0; margin: 0; border: 0; padding: 0; }
+.student-tag-fieldset legend { font-size: 13px; font-weight: 650; }
+.student-tag-fieldset p { margin: 8px 0 12px; color: var(--muted); font-size: 12px; }
+.student-tag-options { display: flex; flex-wrap: wrap; gap: 8px; }
+.student-tag-option { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; border: 1px solid var(--line); border-radius: var(--tag-radius); padding: 8px 12px; background: var(--tag-background); font-size: 12px; cursor: pointer; transition: transform .15s, border-color .15s, box-shadow .15s; }
+.student-tag-option input { width: 16px; height: 16px; margin: 0; accent-color: var(--primary); }
+.student-tag-option:has(input:checked) { border-color: var(--tag-border); background: var(--tag-selected); color: var(--tag-text); }
+.student-tag-option:hover { transform: translateY(-2px); border-color: var(--primary); box-shadow: 0 4px 8px var(--line); }
+.student-tag-option:active { transform: translateY(2px); box-shadow: none; }
+.student-tag-option:has(input:focus-visible) { outline: 2px solid var(--primary); outline-offset: 3px; }
+.student-tag-fieldset:disabled .student-tag-option { opacity: .55; cursor: not-allowed; transform: none; box-shadow: none; }
 
 * { box-sizing: border-box; }
 html { background: var(--background); }
@@ -201,7 +242,9 @@ button { cursor: pointer; }
 .students-card:has(.student-status-filter[open]) { overflow: visible; }
 .table-wrapper { overflow-x: auto; border-top: 1px solid var(--line); }
 table { width: 100%; min-width: 950px; border-collapse: collapse; }
-.pte-table { min-width: 680px; }
+.pte-table { min-width: 900px; }
+.pte-table .student-limitations-cell { min-width: 200px; max-width: 340px; padding-top: 12px; padding-bottom: 12px; }
+.student-limitations-cell p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--text); font-size: 12px; line-height: 1.6; }
 .student-status-section > .status { font-size: 12px; padding: 8px 14px; }
 th { height: 39px; padding: 0 12px; color: #a2a6b5; background: #fafbfc; font-size: 8px; font-weight: 650; text-align: left; letter-spacing: .3px; }
 th:first-child, td:first-child { padding-left: 22px; }

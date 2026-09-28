@@ -3,6 +3,13 @@ import type { AssignedUser } from "../lib/staff";
 export const STUDENT_STATUSES = ["Đã đăng ký thi", "Đã thi đậu", "Đang học", "Bảo Lưu", "Bỏ học"] as const;
 export type StudentStatus = typeof STUDENT_STATUSES[number];
 
+export const STUDENT_TAGS = ["Có thể thi được", "Cần thi gấp", "Cần hỗ trợ đặc biệt"] as const;
+export type StudentTag = typeof STUDENT_TAGS[number];
+
+export function normalizeStudentTags(value: unknown): StudentTag[] {
+  return Array.isArray(value) ? STUDENT_TAGS.filter((tag) => value.includes(tag)) : [];
+}
+
 export function normalizeStudentStatus(value: unknown): StudentStatus {
   return STUDENT_STATUSES.find((status) => status === value) ?? "Đang học";
 }
@@ -29,6 +36,8 @@ export type Student = {
   phase: StudyPhase; startDate: string; examDate?: string; targetScore: number;
   currentScore: number; attendance: number; status: StudentStatus; color: string;
   passedRecordedDate?: string;
+  tags?: StudentTag[];
+  weeklyLimitations?: string;
   lastActive: string; skills: Record<PteSkill, number>; tasks: TaskProgress[];
   weeklyReports: WeeklyReport[];
 };

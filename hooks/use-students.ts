@@ -1,10 +1,11 @@
 "use client";
 
-import { collection, deleteDoc, doc, getDocs, setDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs, setDoc, updateDoc, runTransaction } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { normalizeStudentStatus, type Student } from "@/data/students";
+import { normalizeStudentStatus, normalizeStudentTags, type Student, type StudentTag } from "@/data/students";
 import { db, isFirebaseConfigured } from "@/lib/firebase";
 import { withPassedRecordedDate } from "@/lib/honor-ranking";
+import { inlineStudentPatch, type StudentInlineChange } from "@/lib/student-inline";
 
 export function useStudents() {
   const [studentList, setStudentList] = useState<Student[]>([]);
@@ -77,7 +78,29 @@ export function useStudents() {
     }
   }
 
-  return { studentList, isLoading, storageError, saveStudent, removeStudent };
+  async function saveStudentTags(studentId: string, value: StudentTag[]) {
+    if (!isFirebaseConfigured || !db) throw new Error("Firebase chưa được cấu hình.");
+    const tags = normalizeStudentTags(value);
+    // Only update tags, preserving any concurrent changes to the rest of the profile.
+    await updateDoc(doc(db, "students", studentId), { tags });
+    setStudentList((current) => current.map((student) => student.id === studentId ? { ...student, tags } : student));
+  }
+
+  async function saveStudentInline(studentId: string, change: StudentInlineChange) {
+    if (!isFirebaseConfigured || !db) throw new Error("Firebase chưa được cấu hình.");
+    const reference = doc(db, "students", studentId);
+    const patch = await runTransaction(db, async (transaction) => {
+      const snapshot = await transaction.get(reference);
+      if (!snapshot.exists()) throw new Error("Học viên không còn tồn tại.");
+      const patch = inlineStudentPatch(normalizeStudent(snapshot.data()), change);
+      transaction.update(reference, patch);
+      return patch;
+    });
+    setStudentList((current) => current.map((student) => student.id === studentId ? { ...student, ...patch } : student));
+    return patch;
+  }
+
+  return { studentList, isLoading, storageError, saveStudent, saveStudentTags, saveStudentInline, removeStudent };
 }
 
 type LegacyStudent = Omit<Student, "instructors" | "teachingAssistants"> & {
@@ -93,6 +116,7 @@ function normalizeStudent(value: unknown): Student {
   return {
     ...currentStudent,
     status: normalizeStudentStatus(student.status),
+    tags: normalizeStudentTags(student.tags),
     instructors: normalizeNames(student.instructors, instructor),
     teachingAssistants: normalizeNames(student.teachingAssistants, teachingAssistant),
     color: normalizeBrandColor(student.color),
