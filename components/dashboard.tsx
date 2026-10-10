@@ -25,6 +25,7 @@ import StudentForm from "@/components/student-form";
 import { StudentTagEditor, StudentTags } from "@/components/ui/student-tags";
 import { STUDENT_TAGS, normalizeStudentTags, type StudentTag } from "@/data/students";
 import Honors from "@/components/honors";
+import DashboardWorkspace from "@/components/dashboard-workspace";
 import StudentStatusFilter from "@/components/student-status-filter";
 import { DEFAULT_STUDENT_STATUSES, matchesStudentStatus } from "@/lib/student-status-filter";
 import TaskManager from "@/components/task-manager";
@@ -55,8 +56,6 @@ const statusStyle: Record<StudentStatus, string> = {
   "Bỏ học": "status neutral",
 };
 
-const skillColors = { Speaking: "#fc5d01", Writing: "#fd7f33", Reading: "#e85200", Listening: "#ff8a47" };
-
 export default function Dashboard({ currentUserId, initialAssigneeFilter }: { currentUserId: string; initialAssigneeFilter: string }) {
   const { users: staff, loading: staffLoading, error: staffError, reload: reloadStaff } = useStaff();
   const [assigneeFilter, setAssigneeFilter] = useState(initialAssigneeFilter);
@@ -64,13 +63,7 @@ export default function Dashboard({ currentUserId, initialAssigneeFilter }: { cu
   const upcomingExams = studentList.filter((student) => isUpcomingExam(student.examDate));
   const reservedStudents = studentList.filter((student) => student.status === "Bảo Lưu");
   const studyingStudents = studentList.filter((student) => student.status === "Đang học" || student.status === "Đã đăng ký thi");
-  const reports = studentList.flatMap((student) => student.weeklyReports);
   const averageScore = studentList.length ? (studentList.reduce((sum, student) => sum + student.currentScore, 0) / studentList.length).toFixed(1) : "—";
-  const allTasks = studentList.flatMap((student) => student.tasks);
-  const pteTaskOverview = Array.from(new Set(allTasks.map((task) => task.code))).map((code) => {
-    const tasks = allTasks.filter((task) => task.code === code);
-    return { ...tasks[0], average: Math.round(tasks.reduce((sum, task) => sum + task.score, 0) / tasks.length), color: skillColors[tasks[0].skill] };
-  });
   const metricValue = (value: string) => isLoading ? "…" : storageError ? "—" : value;
   const [query, setQuery] = useState("");
   const [phaseFilter, setPhaseFilter] = useState("Tất cả giai đoạn");
@@ -95,9 +88,10 @@ export default function Dashboard({ currentUserId, initialAssigneeFilter }: { cu
         && matchesStudentAssignee(student, assigneeFilter)
         && (!tagFilter || normalizeStudentTags(student.tags).some((tag) => tag === tagFilter))
         && (phaseFilter === "Tất cả giai đoạn" || student.phase === phaseFilter)
-        && matchesStudentStatus(student.status, statusFilter);
+        && matchesStudentStatus(student.status, statusFilter)
+        && (activeNav !== "Lịch thi" || daysUntilExam(student.examDate) !== null);
     }));
-  }, [phaseFilter, query, statusFilter, studentList, assigneeFilter, tagFilter]);
+  }, [phaseFilter, query, statusFilter, studentList, assigneeFilter, tagFilter, activeNav]);
   const selectedIndex = filteredStudents.findIndex((student) => student.id === selectedStudent?.id);
   const examCopyText = buildExamCopyText(filteredStudents);
   const copyExamSchedule = async () => {
@@ -130,6 +124,12 @@ export default function Dashboard({ currentUserId, initialAssigneeFilter }: { cu
   };
 
   const resetFilters = () => { setQuery(""); setPhaseFilter("Tất cả giai đoạn"); setStatusFilter([...STUDENT_STATUSES]); setAssigneeFilter(""); setTagFilter(""); };
+  const navigateTo = (label: string) => {
+    setActiveNav(label);
+    setMenuOpen(false);
+    setNoticeOpen(false);
+    setExamCopyFeedback(null);
+  };
 
   const handleSave = async (student: Student) => {
     await saveStudent(student);
@@ -174,15 +174,15 @@ export default function Dashboard({ currentUserId, initialAssigneeFilter }: { cu
         <nav className="main-nav" aria-label="Điều hướng chính">
           <p className="nav-title">QUẢN LÝ PTE</p>
           {navItems.map(({ label, icon: Icon }) => (
-            <button key={label} aria-current={activeNav === label ? "page" : undefined} className={activeNav === label ? "active" : ""} onClick={() => { setActiveNav(label); setMenuOpen(false); }}>
+            <button key={label} aria-current={activeNav === label ? "page" : undefined} className={activeNav === label ? "active" : ""} onClick={() => navigateTo(label)}>
               <Icon size={19} /><span>{label}</span>{label === "Học viên PTE" && <span className="nav-count">{studentList.length}</span>}
             </button>
           ))}
           <p className="nav-title secondary-title">HỆ THỐNG</p>
-          <button><Settings size={19} /><span>Cài đặt</span></button>
-          <button><CircleHelp size={19} /><span>Trợ giúp</span></button>
+          <button className={activeNav === "Cài đặt" ? "active" : ""} aria-current={activeNav === "Cài đặt" ? "page" : undefined} onClick={() => navigateTo("Cài đặt")}><Settings size={19} /><span>Cài đặt</span></button>
+          <button className={activeNav === "Trợ giúp" ? "active" : ""} aria-current={activeNav === "Trợ giúp" ? "page" : undefined} onClick={() => navigateTo("Trợ giúp")}><CircleHelp size={19} /><span>Trợ giúp</span></button>
         </nav>
-        <div className="upgrade-card"><span className="upgrade-icon"><Target size={20} /></span><strong>Tình hình học viên</strong><p>{isLoading ? "Đang tải..." : storageError ? "Chưa tải được dữ liệu." : `${upcomingExams.length} học viên sắp thi và ${reservedStudents.length} học viên bảo lưu.`}</p><button onClick={() => setStatusFilter(["Bảo Lưu"])}>Xem học viên bảo lưu</button></div>
+        <div className="upgrade-card"><span className="upgrade-icon"><Target size={20} /></span><strong>Tình hình học viên</strong><p>{isLoading ? "Đang tải..." : storageError ? "Chưa tải được dữ liệu." : `${upcomingExams.length} học viên sắp thi và ${reservedStudents.length} học viên bảo lưu.`}</p><button onClick={() => { resetFilters(); setStatusFilter(["Bảo Lưu"]); navigateTo("Học viên PTE"); }}>Xem học viên bảo lưu</button></div>
         <div className="sidebar-profile"><AuthControls /></div>
       </aside>
       {menuOpen && <button className="backdrop" onClick={() => setMenuOpen(false)} aria-label="Đóng menu" />}
@@ -196,37 +196,24 @@ export default function Dashboard({ currentUserId, initialAssigneeFilter }: { cu
         </header>
 
         <div className="page-content">
-          {activeNav === "Vinh danh" ? <Honors students={studentList} loading={isLoading} error={storageError} onSelect={setSelectedStudent} /> : <>
+          {activeNav === "Vinh danh" ? <Honors students={studentList} loading={isLoading} error={storageError} onSelect={setSelectedStudent} /> : activeNav === "Cài đặt" ? <section className="card workspace-info"><h1>Cài đặt tài khoản</h1><p>Chọn ảnh đại diện để quản lý thông tin cá nhân và bảo mật tài khoản. Quản trị viên có thể mở “Quản lý tài khoản” để cấp quyền nhân sự.</p><AuthControls /></section> : activeNav === "Trợ giúp" ? <section className="card workspace-info"><h1>Trợ giúp sử dụng</h1><dl><dt>Học viên PTE</dt><dd>Tìm kiếm, lọc học viên và bấm tên để mở hồ sơ. Các ô cập nhật trực tiếp có thông báo tự lưu; chờ “Đã lưu” trước khi đóng.</dd><dt>PTE Tasks</dt><dd>Chọn “Quản lý tasks” của học viên để thêm, sửa hoặc xóa task trong lộ trình.</dd><dt>Báo cáo tuần</dt><dd>Chọn “Cập nhật tuần” để thêm báo cáo hoặc “Sửa báo cáo” để cập nhật tuần đã lưu.</dd><dt>Lịch thi</dt><dd>Xem học viên có ngày đăng ký thi. Nút “Copy lịch thi” sao chép danh sách đang lọc, nhóm theo ngày.</dd><dt>Lỗi lưu dữ liệu</dt><dd>Giữ nguyên bản nháp, kiểm tra kết nối rồi chọn “Thử lại”, hoặc “Hoàn tác” để bỏ thay đổi.</dd></dl></section> : <>
           <section className="welcome-row">
-            <div><h1>Tổng quan lớp PTE</h1><p>Theo dõi lịch thi, điểm số và kết quả luyện task hằng tuần.</p><div className="dashboard-date"><CalendarDays size={16} aria-hidden="true" /><span>{new Intl.DateTimeFormat("vi-VN", { dateStyle: "full" }).format(new Date())}</span></div></div>
+            <div><h1>{activeNav === "Tổng quan" ? "Tổng quan lớp PTE" : activeNav}</h1><p>{activeNav === "PTE Tasks" ? "Quản lý lộ trình và điểm task theo từng học viên." : activeNav === "Báo cáo tuần" ? "Ghi nhận và xem lại các báo cáo học tập của học viên." : activeNav === "Lịch thi" ? "Danh sách học viên có ngày đăng ký thi, sắp xếp theo độ gần của kỳ thi." : "Theo dõi lịch thi, điểm số và tiến độ của học viên."}</p><div className="dashboard-date"><CalendarDays size={16} aria-hidden="true" /><span>{new Intl.DateTimeFormat("vi-VN", { dateStyle: "full" }).format(new Date())}</span></div></div>
             <div className="welcome-actions"><Button onClick={exportCsv} disabled={isLoading || !!storageError || !filteredStudents.length}><Download size={18} />Xuất báo cáo</Button><Button variant="primary" onClick={() => setEditingStudent(null)}><UserPlus size={18} />Thêm học viên</Button></div>
           </section>
 
           {storageError && <div className="storage-error" role="alert"><AlertTriangle size={18} />{storageError}</div>}
 
-          <section className="metrics-grid" aria-label="Chỉ số PTE tổng quan">
+          {activeNav === "Tổng quan" && <section className="metrics-grid" aria-label="Chỉ số PTE tổng quan">
             <MetricCard icon={Users} color="purple" label="Học viên đang học" value={metricValue(String(studyingStudents.length))} detail="Đang học hoặc đã đăng ký thi" />
             <MetricCard icon={CalendarClock} color="blue" label="Sắp thi trong 30 ngày" value={metricValue(String(upcomingExams.length))} detail="Theo ngày thi dự kiến" />
             <MetricCard icon={BarChart3} color="green" label="Điểm PTE trung bình" value={metricValue(averageScore)} detail="Theo điểm hiện tại" />
             <MetricCard icon={AlertTriangle} color="orange" label="Học viên bảo lưu" value={metricValue(String(reservedStudents.length))} detail="Theo trạng thái đã lưu" />
-          </section>
+          </section>}
 
-          <section className="charts-grid">
-            <Card className="activity-card">
-              <CardHeader title="Tổng hợp báo cáo học tập" subtitle="Tất cả báo cáo tuần đã lưu" action={null} />
-              {isLoading || storageError || !reports.length ? <p className="no-week-data">{isLoading ? "Đang tải báo cáo..." : storageError ? "Chưa tải được báo cáo." : "Chưa có báo cáo tuần."}</p> : <div className="chart-summary"><div><p><small>Báo cáo đã lưu</small><strong>{reports.length}</strong></p></div><div><p><small>Tổng task hoàn thành</small><strong>{reports.reduce((sum, report) => sum + report.tasksCompleted, 0)}</strong></p></div><div><p><small>Điểm mock trung bình</small><strong>{(reports.reduce((sum, report) => sum + report.mockScore, 0) / reports.length).toFixed(1)}</strong></p></div></div>}
-              <div className="report-context"><ClipboardList size={20} aria-hidden="true" /><p>Tổng hợp từ các báo cáo tuần đã lưu của toàn bộ học viên, không chỉ riêng tuần gần nhất.</p></div>
-            </Card>
-
-            <Card className="course-card">
-              <CardHeader title="Hiệu suất PTE Tasks" subtitle="Điểm trung bình các task trọng yếu" action={<button className="text-button" onClick={() => setActiveNav("PTE Tasks")}>Chi tiết <ChevronRight size={16} /></button>} />
-              {(isLoading || storageError || !pteTaskOverview.length) && <p className="no-week-data">{isLoading ? "Đang tải tasks..." : storageError ? "Chưa tải được tasks." : "Chưa có dữ liệu task."}</p>}
-              <div className="course-list">{pteTaskOverview.map((task) => <div className="course-item" key={task.code}><div className="course-heading"><span className="task-code" style={{ color: task.color, background: `${task.color}14` }}>{task.code}</span><div><strong>{task.name}</strong><small>{task.skill}</small></div><b>{task.average}/90</b></div><div className="progress-track"><span style={{ width: `${task.average / .9}%`, background: task.color }} /></div></div>)}</div>
-            </Card>
-          </section>
 
           <section className="card students-card">
-            <CardHeader title="Tiến độ học viên PTE" subtitle="Học viên, ngày đăng ký thi, điểm mục tiêu và trạng thái hiện tại" action={<div className="student-table-actions"><Button onClick={copyExamSchedule} disabled={isLoading || !!storageError || !examCopyText || copyingExams} title="Copy học viên đang hiển thị có ngày đăng ký thi, nhóm theo ngày"><Copy size={16} aria-hidden="true" />{copyingExams ? "Đang copy…" : "Copy lịch thi"}</Button><button className="text-button" onClick={resetFilters}>Xem tất cả <ChevronRight size={16} /></button></div>} />
+            <CardHeader title={activeNav === "PTE Tasks" ? "Tasks theo học viên" : activeNav === "Báo cáo tuần" ? "Báo cáo theo học viên" : activeNav === "Lịch thi" ? "Học viên có ngày đăng ký thi" : "Tiến độ học viên PTE"} subtitle={activeNav === "PTE Tasks" || activeNav === "Báo cáo tuần" ? "Danh sách áp dụng các bộ lọc bên dưới" : "Học viên, ngày đăng ký thi, điểm mục tiêu và trạng thái hiện tại"} action={<div className="student-table-actions"><Button onClick={copyExamSchedule} disabled={isLoading || !!storageError || !examCopyText || copyingExams} title="Copy học viên đang hiển thị có ngày đăng ký thi, nhóm theo ngày"><Copy size={16} aria-hidden="true" />{copyingExams ? "Đang copy…" : "Copy lịch thi"}</Button><button className="text-button" onClick={resetFilters}>Xem tất cả <ChevronRight size={16} /></button></div>} />
             {examCopyFeedback && <p className="exam-copy-feedback" role={examCopyFeedback.error ? "alert" : "status"}>{examCopyFeedback.text}</p>}
             <div className="student-list-scope"><Tabs label="Phạm vi người phụ trách" options={[{ value: "", label: "Tất cả học viên" }, { value: currentUserId, label: "Tôi phụ trách" }]} value={assigneeFilter} onChange={setAssigneeFilter} /><span className="student-result-count" role="status">{isLoading ? "Đang tải dữ liệu…" : storageError ? "Chưa tải được dữ liệu" : `${filteredStudents.length} học viên phù hợp`}</span></div>
             <div className="table-tools">
@@ -241,9 +228,9 @@ export default function Dashboard({ currentUserId, initialAssigneeFilter }: { cu
               <StudentStatusFilter selected={statusFilter} onChange={setStatusFilter} />
               <select value={tagFilter} onChange={(event) => setTagFilter(event.target.value)} aria-label="Lọc theo tag"><option value="">Tất cả tag</option>{STUDENT_TAGS.map((tag) => <option key={tag} value={tag}>{tag}</option>)}</select>
             </div>
-            <div className="table-wrapper"><table className="pte-table"><thead><tr><th>HỌC VIÊN</th><th>NGÀY ĐĂNG KÝ THI</th><th>TARGET PTE</th><th>TRẠNG THÁI</th><th>NGƯỜI ĐỀ XUẤT ĐI THI</th><th>HẠN CHẾ CỦA HỌC VIÊN</th><th /></tr></thead>
+            {activeNav === "PTE Tasks" || activeNav === "Báo cáo tuần" ? <DashboardWorkspace mode={activeNav} students={filteredStudents} loading={isLoading} error={storageError} onManage={setManagingTasks} onReport={(student, reportIndex) => setWeeklyUpdate({ student, reportIndex })} onProfile={setSelectedStudent} /> : <div className="table-wrapper"><table className="pte-table"><thead><tr><th>HỌC VIÊN</th><th>NGÀY ĐĂNG KÝ THI</th><th>TARGET PTE</th><th>TRẠNG THÁI</th><th>NGƯỜI ĐỀ XUẤT ĐI THI</th><th>HẠN CHẾ CỦA HỌC VIÊN</th><th /></tr></thead>
               <tbody>{filteredStudents.map((student) => { return <tr key={student.id} onClick={() => setSelectedStudent(student)}><td><div className="student-cell"><span className="student-avatar" style={{ background: `${student.color}18`, color: student.color }}>{student.initials}</span><div><button type="button" className="student-profile-link" onClick={(event) => { event.stopPropagation(); setSelectedStudent(student); }}>{student.name}</button><small>{student.phase}</small><span className="support-summary">GV: {supportNames(student.instructors)} · TG: {supportNames(student.teachingAssistants)}</span></div></div></td><td><strong className="date-value">{formatDate(student.examDate)}</strong><small className={isUpcomingExam(student.examDate) ? "exam-soon" : ""}>{examCountdown(student.examDate)}</small></td><td className="student-target-cell"><strong>{student.targetScore}</strong><span> / 90</span></td><td><span className={statusStyle[student.status]}><i />{student.status}</span><StudentTags tags={student.tags} /></td><td className="exam-recommenders-cell">{student.examRecommenders?.length ? student.examRecommenders.join(", ") : "Chưa ghi nhận"}</td><td className="student-limitations-cell"><p>{student.weeklyLimitations?.trim() || "—"}</p></td><td><div className="row-actions"><button className="tasks" onClick={(event) => { event.stopPropagation(); setManagingTasks(student); }} aria-label={`Quản lý tasks của ${student.name}`} title="Quản lý tasks"><BookOpenCheck size={15} /></button><button className="weekly" onClick={(event) => { event.stopPropagation(); setWeeklyUpdate({ student }); }} aria-label={`Cập nhật tuần cho ${student.name}`} title="Cập nhật tuần"><ClipboardList size={15} /></button><button className="edit" onClick={(event) => { event.stopPropagation(); setEditingStudent(student); }} aria-label={`Sửa ${student.name}`} title="Sửa"><Pencil size={15} /></button><button className="delete" onClick={(event) => { event.stopPropagation(); setDeletingStudent(student); }} aria-label={`Xóa ${student.name}`} title="Xóa"><Trash2 size={15} /></button></div></td></tr>; })}</tbody>
-            </table>{isLoading ? <div className="empty-state"><strong>Đang tải học viên...</strong></div> : !filteredStudents.length && <div className="empty-state"><Search size={28} /><strong>{storageError ? "Không thể tải học viên" : studentList.length ? "Không tìm thấy học viên" : "Chưa có học viên"}</strong><p>{storageError ? "Kiểm tra kết nối và quyền Firebase rồi tải lại trang." : studentList.length ? "Hãy thử thay đổi bộ lọc." : "Nhấn Thêm học viên để bắt đầu."}</p></div>}</div>
+            </table>{isLoading ? <div className="empty-state"><strong>Đang tải học viên...</strong></div> : !filteredStudents.length && <div className="empty-state"><Search size={28} /><strong>{storageError ? "Không thể tải học viên" : studentList.length ? "Không tìm thấy học viên" : "Chưa có học viên"}</strong><p>{storageError ? "Kiểm tra kết nối và quyền Firebase rồi tải lại trang." : studentList.length ? "Hãy thử thay đổi bộ lọc." : "Nhấn Thêm học viên để bắt đầu."}</p></div>}</div>}
             {staffError && <div className="assignment-filter-note" role="alert">{staffError} <button type="button" className="text-button" onClick={reloadStaff}>Thử lại</button></div>}
             <div className="table-footer"><span>Hiển thị {filteredStudents.length} trên {studentList.length} học viên PTE{assigneeFilter === currentUserId ? " · Tôi phụ trách" : ""}</span><span>Ưu tiên: có ngày đăng ký thi → Có thể thi được / Cần thi gấp → còn lại</span></div>
           </section>
@@ -251,7 +238,7 @@ export default function Dashboard({ currentUserId, initialAssigneeFilter }: { cu
         </div>
       </main>
 
-      <nav className="mobile-nav">{navItems.slice(0, 4).map(({ label, icon: Icon }) => <button key={label} className={activeNav === label ? "active" : ""} onClick={() => setActiveNav(label)}><Icon size={20} /><span>{label.replace(" PTE", "")}</span></button>)}</nav>
+      <nav className="mobile-nav">{navItems.slice(0, 4).map(({ label, icon: Icon }) => <button key={label} className={activeNav === label ? "active" : ""} onClick={() => navigateTo(label)}><Icon size={20} /><span>{label.replace(" PTE", "")}</span></button>)}</nav>
       {selectedStudent && <StudentDetail key={selectedStudent.id} onInlineSave={handleInlineSave} onTagSave={handleTagSave} student={selectedStudent} nextStudentName={nextStudent?.name} onNext={nextStudent ? () => setSelectedStudent(nextStudent) : undefined} onClose={() => setSelectedStudent(null)} onEdit={() => { setEditingStudent(selectedStudent); setSelectedStudent(null); }} onDelete={() => { setDeletingStudent(selectedStudent); setSelectedStudent(null); }} onManageTasks={() => { setManagingTasks(selectedStudent); setSelectedStudent(null); }} onWeeklyUpdate={(reportIndex) => { setWeeklyUpdate({ student: selectedStudent, reportIndex }); setSelectedStudent(null); }} />}
       {editingStudent !== undefined && <StudentForm student={editingStudent} existingIds={studentList.map((student) => student.id)} onCancel={() => setEditingStudent(undefined)} onSave={handleSave} />}
       {deletingStudent && <DeleteConfirmation student={deletingStudent} onCancel={() => setDeletingStudent(null)} onConfirm={handleDelete} />}

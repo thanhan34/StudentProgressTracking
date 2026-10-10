@@ -50,6 +50,25 @@
 .student-list-scope { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding: 0 24px 20px; }
 .student-result-count { color: var(--dashboard-text-secondary); font-size: 12px; }
 .student-table-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.workspace-info { padding: 24px; }
+.workspace-info h1 { font-size: 28px; font-weight: 700; }
+.workspace-info p, .workspace-info dd { max-width: 75ch; margin-top: 12px; color: var(--dashboard-text-secondary); font-size: 14px; line-height: 1.8; }
+.workspace-info dt { margin-top: 24px; font-weight: 600; }
+.workspace-info .auth-controls { margin-top: 24px; }
+.workspace-list { padding: 0 24px; }
+.workspace-student { padding: 24px 0; border-bottom: 1px solid var(--line); }
+.workspace-student:last-child { border-bottom: 0; }
+.workspace-student header, .workspace-reports li { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.workspace-student p { color: var(--dashboard-text-secondary); font-size: 13px; line-height: 1.7; }
+.workspace-tasks, .workspace-reports { display: grid; gap: 12px; margin-top: 16px; list-style: none; }
+.workspace-tasks li { display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 12px; font-size: 13px; line-height: 1.7; }
+.workspace-tasks strong { color: var(--primary-dark); }
+.workspace-reports li { border-top: 1px solid var(--line); padding-top: 12px; }
+@media (max-width: 760px) {
+  .workspace-list { padding-inline: 16px; }
+  .workspace-tasks li { grid-template-columns: 44px minmax(0, 1fr); }
+  .workspace-tasks li > span:last-child { grid-column: 2; }
+}
 .dashboard-shell .exam-copy-feedback { margin: 0 24px 16px; border: 1px solid var(--primary-light); border-radius: 10px; padding: 12px 16px; color: var(--primary-dark); background: var(--background); font-size: 13px; line-height: 1.6; }
 .dashboard-shell .table-tools { gap: 12px; padding: 16px 24px; background: var(--background); }
 .dashboard-shell .table-search { flex: 1 1 260px; width: auto; min-width: 0; min-height: 44px; height: auto; background: var(--card); }
