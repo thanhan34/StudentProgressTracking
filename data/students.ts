@@ -33,6 +33,7 @@ export type Student = {
   id: string; name: string; initials: string; email?: string; phone?: string;
   instructors: string[]; teachingAssistants: string[];
   instructorUsers?: AssignedUser[]; teachingAssistantUsers?: AssignedUser[];
+  examRecommenders?: string[]; examRecommenderUsers?: AssignedUser[];
   phase: StudyPhase; startDate: string; examDate?: string; targetScore: number;
   currentScore: number; attendance: number; status: StudentStatus; color: string;
   passedRecordedDate?: string;

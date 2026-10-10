@@ -65,11 +65,23 @@
   --tag-text: var(--primary-dark);
   --tag-border: var(--primary-light);
   --tag-radius: 999px;
+  /* Dashboard tokens extend the incumbent light PTE Intensive identity. */
+  --dashboard-text-secondary: #705b50;
+  --dashboard-surface-subtle: #fff3eb;
+  --dashboard-border: var(--line);
+  --dashboard-glass: rgba(255, 255, 255, .93);
+  --dashboard-radius: 16px;
+  --dashboard-control-radius: 10px;
+  --dashboard-blur: 14px;
+  --dashboard-shadow: 0 4px 16px rgba(48, 37, 31, .04), 0 16px 32px rgba(48, 37, 31, .02);
+  --dashboard-shadow-hover: 0 6px 20px rgba(48, 37, 31, .08);
 }
 
 .student-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
 .student-tag-editor { margin-top: 16px; }
 .student-weekly-limitations { margin-top: 16px; }
+.student-inline-status { margin-top: 16px; max-width: 480px; }
+.student-exam-recommenders { margin-top: 16px; }
 .inline-save-field { min-width: 0; }
 .inline-save-field > fieldset { min-width: 0; border: 0; padding: 0; margin: 0; }
 .inline-save-field > fieldset:disabled { opacity: .65; }
@@ -104,6 +116,14 @@
 .student-tag-fieldset:disabled .student-tag-option { opacity: .55; cursor: not-allowed; transform: none; box-shadow: none; }
 
 * { box-sizing: border-box; }
+/* Reusable controls inherit the app's existing palette, not a replacement theme. */
+.ui-input { width: 100%; min-width: 0; border: 0; background: transparent; caret-color: var(--primary-dark); }
+.ui-tabs { display: inline-flex; flex-wrap: wrap; gap: 4px; border: 1px solid var(--line); border-radius: 12px; padding: 4px; background: var(--background); }
+.ui-tabs button { min-height: 44px; border: 1px solid transparent; border-radius: 8px; padding: 8px 16px; color: var(--dashboard-text-secondary); background: transparent; font-size: 13px; font-weight: 600; transition: background .18s, transform .18s, box-shadow .18s; }
+.ui-tabs button[aria-pressed="true"] { border-color: var(--primary-light); color: var(--primary-dark); background: var(--card); box-shadow: 0 2px 6px rgba(48, 37, 31, .04); }
+.ui-tabs button:hover { border-color: var(--primary-light); transform: translateY(-2px); }
+.ui-tabs button:active { transform: translateY(2px); box-shadow: none; }
+.ui-tabs button:focus-visible, .ui-input:focus-visible { outline: 2px solid var(--primary-dark); outline-offset: 3px; }
 html { background: var(--background); }
 body { margin: 0; color: var(--text); background: var(--background); font-family: var(--font-be-vietnam-pro), Arial, sans-serif; font-size: 14px; }
 button, input, select { color: inherit; font: inherit; }

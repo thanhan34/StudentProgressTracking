@@ -2,6 +2,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
+import "./dashboard.css";
+import "./student-detail.css";
 import { getCurrentAccess } from "@/lib/auth";
 import { RoleProvider } from "@/components/role-provider";
 

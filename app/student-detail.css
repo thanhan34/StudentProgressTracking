@@ -1,0 +1,101 @@
+/* Student profile extends the established PTE Intensive light surfaces. */
+.student-detail-backdrop { padding: 24px; }
+.student-detail {
+  width: min(1040px, 100%);
+  max-height: calc(100dvh - 48px);
+  padding: 32px;
+  border: 1px solid var(--dashboard-border);
+  border-radius: 20px;
+  color: var(--text);
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-light) var(--background);
+  overscroll-behavior: contain;
+}
+.student-detail:focus { outline: none; }
+.student-detail .modal-close { top: 20px; right: 20px; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 12px; color: var(--dashboard-text-secondary); background: var(--background); }
+.student-detail .profile-header { padding-right: 56px; gap: 16px; }
+.student-detail .profile-header > div:nth-child(2) { min-width: 0; }
+.student-detail .modal-avatar { width: 64px; height: 64px; border-radius: 16px; color: var(--primary-dark); background: var(--primary-soft); font-size: 20px; }
+.student-detail .profile-header h2 { font-size: clamp(22px, 3vw, 28px); line-height: 1.4; overflow-wrap: anywhere; }
+.profile-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 8px; color: var(--dashboard-text-secondary); font-size: 13px; }
+.student-detail .status { font-size: 12px; }
+.profile-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.4fr); gap: 24px; margin-top: 24px; border: 1px solid var(--line); border-radius: 16px; padding: 20px 24px; background: var(--background); }
+.profile-summary > div { display: flex; min-width: 0; flex-direction: column; gap: 8px; }
+.profile-summary span { color: var(--dashboard-text-secondary); font-size: 12px; line-height: 1.6; }
+.profile-summary strong { font-size: 24px; line-height: 1.4; font-variant-numeric: tabular-nums; }
+.profile-summary small { color: var(--dashboard-text-secondary); font-size: 13px; font-weight: 500; }
+.profile-summary .profile-exam-summary { flex-direction: row; align-items: center; gap: 12px; border-left: 1px solid var(--line); padding-left: 24px; }
+.profile-exam-summary svg { flex-shrink: 0; color: var(--primary-dark); }
+.profile-exam-summary strong { display: block; margin-top: 4px; color: var(--text); font-size: 14px; }
+.student-detail > .profile-save-note { margin: 16px 0 0; color: var(--dashboard-text-secondary); font-size: 12px; line-height: 1.7; }
+.student-detail .detail-section { margin-top: 24px; padding-top: 24px; }
+.student-detail .section-heading { flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+.student-detail .section-heading h3 { font-size: 18px; line-height: 1.4; }
+.student-detail :is(.small-add-button, .week-edit) { min-height: 44px; border-radius: 10px; font-size: 12px; }
+.student-detail .week-edit { min-width: 44px; }
+.profile-status-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+.student-detail :is(.student-inline-status, .student-exam-recommenders) { margin-top: 0; max-width: none; min-width: 0; }
+.student-detail .form-field { gap: 8px; }
+.student-detail .form-field > span { color: var(--text); font-size: 13px; font-weight: 600; }
+.student-detail .form-field :is(input, select, textarea) { width: 100%; min-width: 0; min-height: 44px; border-color: var(--line); border-radius: 10px; padding: 12px; background: var(--card); color: var(--text); font-size: 14px; line-height: 1.5; }
+.student-detail .form-field textarea { resize: vertical; }
+.student-detail :is(.form-field small, .inline-save-hint, .inline-save-status) { color: var(--dashboard-text-secondary); font-size: 12px; line-height: 1.7; }
+.student-detail .inline-save-status { min-height: 24px; }
+.student-detail .inline-save-error { border: 1px solid var(--primary-light); border-radius: 10px; padding: 12px; background: var(--background); }
+.student-detail .student-tag-editor { margin-top: 24px; }
+.student-detail .student-tag-fieldset legend { margin-bottom: 12px; font-size: 13px; }
+.student-detail .student-tag-option { min-height: 44px; padding: 8px 12px; }
+.student-detail .timeline-info { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); align-items: start; gap: 24px; margin: 0; padding: 20px; color: var(--primary-dark); }
+.student-detail .timeline-info > div { min-width: 0; align-items: flex-start; }
+.student-detail .timeline-info > div > span { color: var(--dashboard-text-secondary); font-size: 13px; }
+.student-detail .timeline-info strong { color: var(--text); font-size: 16px; line-height: 1.6; }
+.student-detail .timeline-info .inline-save-field { flex: 1; }
+.student-detail .inline-support-grid { gap: 24px; }
+.student-detail .name-chips { gap: 8px; }
+.student-detail .name-chips > span { padding: 4px 4px 4px 12px; font-size: 12px; }
+.student-detail .name-chips > span > button { width: 44px; height: 44px; background: transparent; }
+.student-detail .inline-task-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.student-detail .inline-task-card { padding: 20px; background: var(--card); border-radius: 14px; }
+.student-detail .inline-task-card > header { align-items: flex-start; }
+.student-detail .inline-task-card > header > div { min-width: 0; }
+.student-detail .inline-task-card header strong { font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; }
+.student-detail .inline-task-card header small { font-size: 12px; color: var(--dashboard-text-secondary); }
+.student-detail .inline-task-numbers { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.student-detail .week-report { grid-template-columns: 12px minmax(120px, 1fr) minmax(0, 2fr) 44px; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.student-detail .week-report:last-child { border-bottom: 0; }
+.student-detail .week-title strong { font-size: 14px; }
+.student-detail .week-title small { font-size: 12px; line-height: 1.5; color: var(--dashboard-text-secondary); }
+.student-detail .week-numbers { flex-wrap: wrap; gap: 8px 16px; }
+.student-detail .week-numbers span { font-size: 12px; color: var(--dashboard-text-secondary); }
+.student-detail .week-numbers b { color: var(--text); font-variant-numeric: tabular-nums; }
+.student-detail .week-report > p { grid-column: 2 / -1; margin: 0; font-size: 13px; line-height: 1.7; color: var(--dashboard-text-secondary); white-space: pre-wrap; overflow-wrap: anywhere; }
+.student-detail .tracking-details { background: var(--background); }
+.student-detail .detail-actions { justify-content: flex-start; gap: 12px; margin-top: 24px; padding-top: 24px; }
+.student-detail .detail-actions .next-student-button { margin-left: auto; }
+.student-detail .inline-navigation-error { z-index: 3; }
+.student-detail .no-week-data { border: 1px dashed var(--line); padding: 24px; background: var(--background); }
+.student-detail :is(button, select, input, textarea):focus-visible { outline: 2px solid var(--primary-dark); outline-offset: 3px; }
+.student-detail :is(.small-add-button, .week-edit, .name-chips button, .modal-close) { transition: background .18s, border-color .18s, transform .18s; }
+.student-detail :is(.small-add-button, .week-edit, .name-chips button, .modal-close):hover:not(:disabled) { border-color: var(--primary-light); background: var(--primary-soft); transform: translateY(-2px); }
+.student-detail :is(.small-add-button, .week-edit, .name-chips button, .modal-close):active:not(:disabled) { transform: translateY(2px); }
+@media (max-width: 760px) {
+  .student-detail-backdrop { padding: 8px; }
+  .student-detail { max-height: calc(100dvh - 16px); padding: 24px 16px; border-radius: 16px; }
+  .student-detail .modal-close { top: 16px; right: 12px; }
+  .student-detail .profile-header { gap: 12px; align-items: flex-start; padding-right: 48px; }
+  .student-detail .modal-avatar { width: 48px; height: 48px; font-size: 16px; border-radius: 12px; }
+  .profile-summary { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; padding: 16px; }
+  .profile-summary strong { font-size: 22px; }
+  .profile-summary .profile-exam-summary { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); padding: 16px 0 0; }
+  .profile-status-grid, .student-detail .timeline-info, .student-detail .inline-task-list { grid-template-columns: minmax(0, 1fr); }
+  .student-detail .inline-task-card { padding: 16px; }
+  .student-detail .week-report { grid-template-columns: 12px minmax(0, 1fr) 44px; }
+  .student-detail .week-edit { grid-column: 3; grid-row: 1; }
+  .student-detail .week-numbers { grid-column: 2 / -1; display: flex; }
+  .student-detail .detail-actions .button { flex: 1 1 160px; }
+  .student-detail .detail-actions .next-student-button { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .student-detail { animation: none; }
+  .student-detail * { transition: none !important; }
+}

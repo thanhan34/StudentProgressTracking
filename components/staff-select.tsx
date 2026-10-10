@@ -6,10 +6,11 @@ import { useStaff } from "@/components/staff-provider";
 import { ROLE_LABELS } from "@/lib/roles";
 import { legacyAssignmentNames, type AssignedUser } from "@/lib/staff";
 
-export default function StaffSelect({ label, names, selectedUsers = [], onChange }: {
+export default function StaffSelect({ label, names, selectedUsers = [], placeholder = "Chọn người phụ trách", onChange }: {
   label: string;
   names: string[];
   selectedUsers?: AssignedUser[];
+  placeholder?: string;
   onChange: (names: string[], users: AssignedUser[]) => void;
 }) {
   const id = useId();
@@ -24,7 +25,7 @@ export default function StaffSelect({ label, names, selectedUsers = [], onChange
         const user = available.find((item) => item.id === event.target.value);
         if (user) update([...selectedUsers, { id: user.id, name: user.name }]);
       }}>
-        <option value="">{loading ? "Đang tải danh sách..." : error ? "Không tải được danh sách" : !users.length ? "Chưa có tài khoản phù hợp" : !available.length ? "Đã chọn tất cả" : "Chọn người phụ trách"}</option>
+        <option value="">{loading ? "Đang tải danh sách..." : error ? "Không tải được danh sách" : !users.length ? "Chưa có tài khoản phù hợp" : !available.length ? "Đã chọn tất cả" : placeholder}</option>
         {available.map((user) => <option value={user.id} key={user.id}>{user.name} — {ROLE_LABELS[user.role]} ({user.id.slice(-6)})</option>)}
       </select>
     </label>

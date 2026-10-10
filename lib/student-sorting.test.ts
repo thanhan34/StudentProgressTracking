@@ -6,14 +6,14 @@ import { sortStudentsByExam } from "./student-sorting";
 const now = new Date(2026, 8, 21, 15);
 const student = (id: string, examDate?: string, status: Student["status"] = "Đang học") => ({ id, examDate, status });
 
-test("each supported tag prioritizes students above untagged booked students", () => {
+test("tags do not prioritize undated students above dated students", () => {
   for (const tag of STUDENT_TAGS) {
     const students = [student("booked", "2026-09-21", "Đã đăng ký thi"), { ...student("tagged"), tags: [tag] }];
-    assert.deepEqual(sortStudentsByExam(students, now).map((s) => s.id), ["tagged", "booked"]);
+    assert.deepEqual(sortStudentsByExam(students, now).map((s) => s.id), ["booked", "tagged"]);
   }
 });
 
-test("tagged groups preserve booking and exam ordering without ranking tags or counting them", () => {
+test("dates determine ordering regardless of tags or booking status", () => {
   const students = [
     { ...student("tagged-far", "2026-10-01"), tags: [...STUDENT_TAGS] },
     student("untagged", "2026-09-21", "Đã đăng ký thi"),
@@ -21,7 +21,7 @@ test("tagged groups preserve booking and exam ordering without ranking tags or c
     { ...student("tagged-booked", undefined, "Đã đăng ký thi"), tags: [STUDENT_TAGS[2]] },
   ];
   const original = [...students];
-  assert.deepEqual(sortStudentsByExam(students, now).map((s) => s.id), ["tagged-booked", "tagged-near", "tagged-far", "untagged"]);
+  assert.deepEqual(sortStudentsByExam(students, now).map((s) => s.id), ["untagged", "tagged-near", "tagged-far", "tagged-booked"]);
   assert.deepEqual(students, original);
 });
 
@@ -30,10 +30,26 @@ test("empty tags behave like legacy profiles without tags", () => {
   assert.deepEqual(sortStudentsByExam(students, now).map((s) => s.id), ["empty", "legacy"]);
 });
 
-test("booked students come first, then upcoming dates ascending within each group", () => {
+test("undated students with ready or urgent tags precede other undated students equally", () => {
+  const students: Pick<Student, "id" | "examDate" | "status" | "tags">[] = [
+    student("ordinary"),
+    { ...student("special"), tags: ["Cần hỗ trợ đặc biệt"] },
+    { ...student("ready"), tags: ["Có thể thi được"] },
+    { ...student("urgent", ""), tags: ["Cần thi gấp"] },
+    { ...student("both", "invalid"), tags: ["Có thể thi được", "Cần thi gấp"] },
+    student("booked", undefined, "Đã đăng ký thi"),
+    student("past", "2026-09-20"),
+    student("future", "2026-10-01"),
+  ];
+  const original = [...students];
+  assert.deepEqual(sortStudentsByExam(students, now).map((s) => s.id), ["future", "past", "ready", "urgent", "both", "ordinary", "special", "booked"]);
+  assert.deepEqual(students, original);
+});
+
+test("upcoming dates sort nearest first across all statuses", () => {
   const students = [student("near", "2026-09-22"), student("booked-far", "2026-10-10", "Đã đăng ký thi"),
     student("far", "2026-10-01"), student("booked-near", "2026-09-23", "Đã đăng ký thi")];
-  assert.deepEqual(sortStudentsByExam(students, now).map((s) => s.id), ["booked-near", "booked-far", "near", "far"]);
+  assert.deepEqual(sortStudentsByExam(students, now).map((s) => s.id), ["near", "booked-near", "far", "booked-far"]);
 });
 
 test("today and future exams precede past exams and missing or invalid dates", () => {
@@ -42,9 +58,9 @@ test("today and future exams precede past exams and missing or invalid dates", (
   assert.deepEqual(sortStudentsByExam(students, now).map((s) => s.id), ["today", "future", "recent", "old", "missing", "invalid", "empty"]);
 });
 
-test("booking priority also applies without an exam date", () => {
+test("booked students without a date remain after students with a date", () => {
   assert.deepEqual(sortStudentsByExam([student("today", "2026-09-21"), student("booked", undefined, "Đã đăng ký thi")], now)
-    .map((s) => s.id), ["booked", "today"]);
+    .map((s) => s.id), ["today", "booked"]);
 });
 
 test("ties retain their original order and sorting does not mutate the input", () => {
