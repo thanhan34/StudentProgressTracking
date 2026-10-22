@@ -36,6 +36,7 @@ import { useStaff } from "@/components/staff-provider";
 import { ROLE_LABELS } from "@/lib/roles";
 import { matchesStudentAssignee } from "@/lib/student-assignment";
 import { sortStudentsByExam } from "@/lib/student-sorting";
+import { matchesStudentSearch } from "@/lib/student-search";
 import { buildExamCopyText } from "@/lib/exam-copy";
 import { formatStudentDate as formatDate, daysUntilExam, isUpcomingExam, examCountdown } from "@/lib/student-dates";
 
@@ -81,10 +82,8 @@ export default function Dashboard({ currentUserId, initialAssigneeFilter }: { cu
   const [examCopyFeedback, setExamCopyFeedback] = useState<{ text: string; error: boolean } | null>(null);
 
   const filteredStudents = useMemo(() => {
-    const normalizedQuery = query.trim().toLocaleLowerCase("vi");
     return sortStudentsByExam(studentList.filter((student) => {
-      const searchable = `${student.name} ${student.instructors.join(" ")} ${student.teachingAssistants.join(" ")} ${student.tasks.map((task) => task.code).join(" ")}`.toLocaleLowerCase("vi");
-      return (!normalizedQuery || searchable.includes(normalizedQuery))
+      return matchesStudentSearch(student, query)
         && matchesStudentAssignee(student, assigneeFilter)
         && (!tagFilter || normalizeStudentTags(student.tags).some((tag) => tag === tagFilter))
         && (phaseFilter === "Tất cả giai đoạn" || student.phase === phaseFilter)

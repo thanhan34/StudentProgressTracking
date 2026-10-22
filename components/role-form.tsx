@@ -13,7 +13,7 @@ export default function RoleForm({ userId, role, locked }: { userId: string; rol
       <select name="role" defaultValue={role} aria-label="Role" disabled={locked || pending}>
         {Object.entries(ROLE_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
       </select>
-      <button className="button primary" disabled={locked || pending}>{pending ? "Đang lưu…" : "Lưu role"}</button>
+      <button className="button primary text-white" disabled={locked || pending}>{pending ? "Đang lưu…" : "Lưu role"}</button>
       {locked && <small>Admin mặc định hoặc tài khoản của bạn — không thể tự hạ quyền.</small>}
       {state.message && <p role="status" className={state.success ? "role-success" : "role-error"}>{state.message}</p>}
     </form>

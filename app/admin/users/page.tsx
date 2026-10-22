@@ -3,13 +3,15 @@ import Link from "next/link";
 import { requireApprovedAccess } from "@/lib/auth";
 import { isBootstrapAdmin, resolveRole } from "@/lib/roles";
 import RoleForm from "@/components/role-form";
+import DeleteAccountForm from "@/components/delete-account-form";
+import { userDeletionRestriction } from "@/lib/user-deletion";
 
 const PAGE_SIZE = 20;
 
 export default async function UsersPage({ searchParams }: { searchParams: Promise<{ q?: string; page?: string }> }) {
   const access = await requireApprovedAccess();
   if (access.role !== "admin") {
-    return <main className="admin-page"><h1>Không có quyền truy cập</h1><p>Chỉ Administrator được quản lý role.</p><Link href="/">Về tổng quan</Link></main>;
+    return <main className="admin-page"><h1>Không có quyền truy cập</h1><p>Chỉ Administrator được quản lý tài khoản.</p><Link href="/">Về tổng quan</Link></main>;
   }
 
   const params = await searchParams;
@@ -36,9 +38,13 @@ export default async function UsersPage({ searchParams }: { searchParams: Promis
         {users.map((user) => {
           const email = user.emailAddresses.find((item) => item.id === user.primaryEmailAddressId)?.emailAddress;
           const role = resolveRole(user);
+          const name = [user.firstName, user.lastName].filter(Boolean).join(" ") || user.username || "Chưa có tên";
           return <article className="card role-user" key={user.id}>
-            <div><h2>{[user.firstName, user.lastName].filter(Boolean).join(" ") || user.username || "Chưa có tên"}</h2><p>{email || "Chưa có email chính"}</p></div>
+            <div><h2>{name}</h2><p>{email || "Chưa có email chính"}</p></div>
+            <div className="role-user-actions">
             <RoleForm key={`${user.id}-${role}`} userId={user.id} role={role} locked={isBootstrapAdmin(user) || user.id === access.userId} />
+            <DeleteAccountForm userId={user.id} name={name} email={email} restriction={userDeletionRestriction(access.userId, user.id, isBootstrapAdmin(user))} />
+            </div>
           </article>;
         })}
         {!users.length && <p>Không tìm thấy tài khoản. Người dùng cần đăng ký trước khi được gán role.</p>}

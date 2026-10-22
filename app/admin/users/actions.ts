@@ -4,8 +4,19 @@ import { clerkClient } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { getCurrentAccess } from "@/lib/auth";
 import { isBootstrapAdmin, isUserRole } from "@/lib/roles";
+import { performUserDeletion, type DeleteUserState } from "@/lib/user-deletion";
 
 export type RoleActionState = { success: boolean; message: string };
+
+export async function deleteAccount(_previous: DeleteUserState, formData: FormData): Promise<DeleteUserState> {
+  const result = await performUserDeletion(formData, {
+    getAccess: getCurrentAccess,
+    getUser: async (userId) => (await clerkClient()).users.getUser(userId),
+    deleteUser: async (userId) => (await clerkClient()).users.deleteUser(userId),
+  });
+  if (result.success) revalidatePath("/", "layout");
+  return result;
+}
 
 export async function assignRole(_previous: RoleActionState, formData: FormData): Promise<RoleActionState> {
   try {
